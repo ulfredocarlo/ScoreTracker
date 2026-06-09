@@ -231,79 +231,48 @@ def login():
     return render_template('login.html')
 
 
-@bp.route('/login/google/mock')
-def login_google_mock():
-    """Simula el retorno de Google OAuth 2.0 y registra/ingresa al usuario al instante. [Willys_IA]"""
-    # Identidad simulada provista de Google
-    email_simulado = "willys.mock@scoretracker.com"
-    nombre_simulado = "Willys (Google)"
-    
-    # Buscar si ya existe este usuario
-    usuario = Usuario.query.filter_by(email=email_simulado).first()
-    
-    if not usuario:
-        # Registrar de forma automatica en base de datos PostgreSQL local
-        usuario = Usuario(nombre=nombre_simulado, email=email_simulado)
-        # Contrasena mock aleatoria por seguridad interna
-        usuario.set_password(str(uuid.uuid4()))
-        db.session.add(usuario)
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error en la simulacion de Google: {str(e)}', 'danger')
+@bp.route('/login/google')
+def login_google():
+    '''Redirige al usuario al flujo de autenticacion de Google OAuth 2.0. [Willys_IA]'''
+    from app import oauth
+    redirect_uri = url_for('main.auth_google_callback', _external=True)
+    if not request.url.startswith('http://localhost') and redirect_uri.startswith('http://'):
+        redirect_uri = redirect_uri.replace('http://', 'https://', 1)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+@bp.route('/auth/google/callback')
+def auth_google_callback():
+    '''Recibe la respuesta de Google, extrae el email y registra/autentica al usuario en PostgreSQL. [Willys_IA]'''
+    from app import oauth
+    import uuid
+    try:
+        token = oauth.google.authorize_access_token()
+        user_info = token.get('userinfo')
+        if not user_info:
+            flash('Error al obtener la informacion de Google.', 'danger')
             return redirect(url_for('main.login'))
             
-    # Autenticar sesion en Flask-Login
-    login_user(usuario, remember=True)
-    flash('¡Has iniciado sesion con tu cuenta de Google de forma exitosa (Modo Simulado)!', 'success')
-    next_page = request.args.get('next')
-    if not next_page or not next_page.startswith('/'):
-        next_page = url_for('main.index')
-    return redirect(next_page)
-
-
-@bp.route('/login/switch')
-def login_switch():
-    """Permite cambiar instantáneamente de usuario para pruebas y simulación del flujo de juego. [Willys_IA]"""
-    email = request.args.get('email', '').strip().lower()
-    if not email:
-        flash('Email no especificado para el cambio de usuario.', 'warning')
-        return redirect(url_for('main.login'))
-    
-    # Lista de correos permitidos para simulación y sus apodos premium
-    correos_simulacion = {
-        'ucarlo@comteco.com.bo': 'Ucarlo Admin',
-        'ulfredoc@gmail.com': 'Ulfredoc Jugador 1',
-        'ulfredo.carlo@gmail.com': 'Ulfredo Jugador 2',
-        'willys@msn.com': 'Willys Jugador 3'
-    }
-    
-    if email not in correos_simulacion:
-        flash('El correo ingresado no está habilitado para simulación rápida.', 'danger')
-        return redirect(url_for('main.login'))
+        email = user_info.get('email').lower()
+        nombre = user_info.get('name', 'Usuario de Google')
         
-    nombre = correos_simulacion[email]
-    
-    # Buscar si ya existe este usuario
-    usuario = Usuario.query.filter_by(email=email).first()
-    if not usuario:
-        # Registrar de forma automática en base de datos PostgreSQL local
-        usuario = Usuario(nombre=nombre, email=email)
-        usuario.set_password('comteco123')
-        db.session.add(usuario)
-        try:
+        # Buscar usuario en BD
+        usuario = Usuario.query.filter_by(email=email).first()
+        
+        if not usuario:
+            # Crear usuario automaticamente
+            usuario = Usuario(nombre=nombre, email=email)
+            usuario.set_password(str(uuid.uuid4()))
+            db.session.add(usuario)
             db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error al crear usuario de simulación: {str(e)}', 'danger')
-            return redirect(url_for('main.login'))
             
-    # Autenticar sesión en Flask-Login
-    login_user(usuario, remember=True)
-    flash(f'Sesión cambiada con éxito. Ahora actúas como: {nombre} ({email})', 'success')
-    
-    next_page = request.args.get('next')
+        login_user(usuario, remember=True)
+        flash(f'Hola {usuario.nombre}! Has iniciado sesion exitosamente con Google.', 'success')
+        return redirect(url_for('main.index'))
+        
+    except Exception as e:
+        flash(f'Error en la autenticacion de Google: {str(e)}', 'danger')
+        return redirect(url_for('main.login'))
+
     if not next_page or not next_page.startswith('/'):
         next_page = url_for('main.index')
     return redirect(next_page)

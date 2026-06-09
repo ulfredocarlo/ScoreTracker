@@ -2,10 +2,12 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from authlib.integrations.flask_client import OAuth
 
 # Instanciacion de extensiones globales de Flask
 db = SQLAlchemy()
 login_manager = LoginManager()
+oauth = OAuth()
 
 def create_app(config_name='default'):
     """Factory Pattern para inicializar la aplicacion ScoreTracker. [Willys_IA]"""
@@ -22,6 +24,15 @@ def create_app(config_name='default'):
     login_manager.login_view = 'main.login'
     login_manager.login_message = 'Por favor, inicia sesion para acceder a este juego.'
     login_manager.login_message_category = 'warning'
+    
+    oauth.init_app(app)
+    oauth.register(
+        name='google',
+        client_id=app.config.get('GOOGLE_CLIENT_ID'),
+        client_secret=app.config.get('GOOGLE_CLIENT_SECRET'),
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+        client_kwargs={'scope': 'openid email profile'}
+    )
     
     # Registro de Blueprints
     from app.routes import bp as main_blueprint

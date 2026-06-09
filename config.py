@@ -19,6 +19,10 @@ class Config:
     SESSION_COOKIE_SAMESITE = 'Lax'
     PERMANENT_SESSION_LIFETIME = timedelta(days=15)
     
+    # Credenciales de Autenticacion Google OAuth 2.0 [Willys_IA]
+    GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+    
     # QR e Informacion del Administrador Global de la App para comisiones
     APP_ADMIN_QR_URL = os.getenv('APP_ADMIN_QR_URL', '')
     APP_ADMIN_TELEFONO = os.getenv('APP_ADMIN_TELEFONO', '+59100000000')
