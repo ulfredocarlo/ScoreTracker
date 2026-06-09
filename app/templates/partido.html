@@ -58,21 +58,21 @@
     /* Widget Partido Premium */
     .widget-match {
         text-align: center;
-        padding: 30px 20px;
+        padding: 15px 10px;
         background: linear-gradient(135deg, hsla(200, 70%, 15%, 0.2) 0%, rgba(15, 23, 42, 0.6) 100%);
         border: 1px solid var(--border-glass);
         border-radius: 16px;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         box-shadow: var(--shadow-premium);
     }
 
     .widget-match-fase {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         color: var(--secondary);
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
         display: block;
     }
 
@@ -80,19 +80,28 @@
         display: grid;
         grid-template-columns: 2fr 1fr 2fr;
         align-items: center;
-        gap: 15px;
-        margin-bottom: 20px;
+        gap: 10px;
+        margin-bottom: 10px;
     }
 
     .widget-team {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
+        justify-content: center;
         gap: 10px;
     }
 
+    .widget-team.local-team {
+        justify-content: flex-end;
+    }
+
+    .widget-team.visit-team {
+        justify-content: flex-start;
+    }
+
     .widget-team-name {
-        font-size: 1.25rem;
+        font-size: 1.1rem;
         font-weight: 700;
         color: var(--text-main);
         font-family: 'Outfit', sans-serif;
@@ -413,26 +422,26 @@
         <span class="widget-match-fase">{{ partido.fase or "Mundial 2026" }}</span>
         <div class="widget-match-grid">
             <!-- Local -->
-            <div class="widget-team">
-                {{ render_jersey(partido.equipo_local, size=60) | safe }}
-                <img src="https://flagcdn.com/w80/{{ partido.codigo_local }}.png" alt="Bandera {{ partido.equipo_local }}" style="border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); width: 50px; height: auto;">
-                <span class="widget-team-name" style="margin-top: 5px;">{{ partido.equipo_local }}</span>
+            <div class="widget-team local-team">
+                <span class="widget-team-name">{{ partido.equipo_local }}</span>
+                <img src="https://flagcdn.com/w80/{{ partido.codigo_local }}.png" alt="Bandera {{ partido.equipo_local }}" style="border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.4); width: 30px; height: auto;">
+                {{ render_jersey(partido.equipo_local, size=35) | safe }}
             </div>
             
             <!-- VS o Score -->
             <div class="widget-versus">
                 {% if partido.estado in ['Terminado', 'Liquidado'] %}
-                    <div class="widget-score">{{ partido.marcador }}</div>
+                    <div class="widget-score" style="font-size: 1.5rem; padding: 4px 12px;">{{ partido.marcador }}</div>
                 {% else %}
                     VS
                 {% endif %}
             </div>
             
             <!-- Visitante -->
-            <div class="widget-team">
-                {{ render_jersey(partido.equipo_visitante, size=60) | safe }}
-                <img src="https://flagcdn.com/w80/{{ partido.codigo_visitante }}.png" alt="Bandera {{ partido.equipo_visitante }}" style="border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); width: 50px; height: auto;">
-                <span class="widget-team-name" style="margin-top: 5px;">{{ partido.equipo_visitante }}</span>
+            <div class="widget-team visit-team">
+                {{ render_jersey(partido.equipo_visitante, size=35) | safe }}
+                <img src="https://flagcdn.com/w80/{{ partido.codigo_visitante }}.png" alt="Bandera {{ partido.equipo_visitante }}" style="border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.4); width: 30px; height: auto;">
+                <span class="widget-team-name">{{ partido.equipo_visitante }}</span>
             </div>
         </div>
         <span class="widget-date">
@@ -500,10 +509,10 @@
                 </button>
 
                 {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] %}
-                    <!-- BOTÓN MODIFICAR REGLAMENTO (PASANDO EL PARTIDO_ID COMO QUERYS) [Willys_IA] -->
-                    <a href="{{ url_for('main.editar_reglas', grupo_id=grupo.id, partido_id=partido.id) }}" class="btn-action-inline modify" style="padding: 8px 16px; font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fa-solid fa-gear"></i> Modificar Reglamento
-                    </a>
+                    <!-- BOTÓN CERRAR PARTIDO (MODAL) [Willys_IA] -->
+                    <button type="button" class="btn-action-inline" onclick="abrirModalLiquidacion()" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; padding: 8px 16px; font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-flag-checkered"></i> Cierre de Partido
+                    </button>
                 {% endif %}
             </div>
         </div>
@@ -539,39 +548,18 @@
                         </div>
                     {% endif %}
                 </div>
+                
+                {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] %}
+                    <div style="margin-top: 15px; border-top: 1px dashed var(--border-glass); padding-top: 15px; text-align: center;">
+                        <a href="{{ url_for('main.editar_reglas', grupo_id=grupo.id, partido_id=partido.id) }}" class="btn-action-inline modify" style="padding: 8px 24px; font-size: 0.85rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
+                            <i class="fa-solid fa-gear"></i> Modificar Reglamento
+                        </a>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
-        <!-- PANEL DE LIQUIDACIÓN Y CIERRE DE PARTIDO [Willys_IA] -->
-        {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] %}
-            <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid var(--primary); border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                    <div>
-                        <h3 style="margin: 0 0 5px 0; color: var(--primary); font-size: 1.2rem;"><i class="fa-solid fa-flag-checkered"></i> Cierre de Partido</h3>
-                        <p style="margin: 0; color: var(--text-muted); font-size: 0.85rem;">Registra el resultado final oficial para calcular ganadores y distribuir el pozo.</p>
-                    </div>
-                    
-                    {% if partido_liquidado %}
-                        <div style="background: rgba(15, 23, 42, 0.6); padding: 12px 20px; border-radius: 8px; border: 1px solid var(--border-glass); text-align: center;">
-                            <span style="color: var(--primary); font-weight: 700; display: block; margin-bottom: 5px;"><i class="fa-solid fa-check-circle"></i> PARTIDO LIQUIDADO</span>
-                            <span style="color: var(--text-main); font-size: 0.85rem;">Ganadores: <strong>{{ resumen_liquidacion.ganadores }}</strong> | Premio Repartido: <strong>{{ resumen_liquidacion.premio_total }} ⚽</strong></span>
-                        </div>
-                    {% else %}
-                        <form id="form-liquidar" style="display: flex; gap: 10px; align-items: center;" onsubmit="ejecutarLiquidacion(event)">
-                            <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);">
-                                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);">Resultado Oficial:</label>
-                                <input type="number" id="liq_local" min="0" max="99" required placeholder="L" style="width: 50px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-glass); color: white; border-radius: 4px; padding: 5px; text-align: center; font-family: 'Outfit', sans-serif;">
-                                <span style="font-weight: 900; color: var(--text-muted);">-</span>
-                                <input type="number" id="liq_visit" min="0" max="99" required placeholder="V" style="width: 50px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-glass); color: white; border-radius: 4px; padding: 5px; text-align: center; font-family: 'Outfit', sans-serif;">
-                            </div>
-                            <button type="submit" class="btn-action-inline approve" style="padding: 10px 20px; font-weight: 700; background: var(--primary); color: #0f172a; border: none;">
-                                <i class="fa-solid fa-gavel"></i> Liquidar Pozo
-                            </button>
-                        </form>
-                    {% endif %}
-                </div>
-            </div>
-        {% endif %}
+
 
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
             Muestra el listado de miembros del grupo, sus pronósticos, comprobantes de pago offline y conciliaciones del Tesorero.
@@ -817,6 +805,44 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL DE CIERRE DE PARTIDO / LIQUIDACION [Willys_IA] -->
+    {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] %}
+    <div id="liquidacion-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 9999; justify-content: center; align-items: center; animation: fade-in 0.3s ease-out;">
+        <div style="background: rgba(30, 41, 59, 0.75); border: 1px solid var(--border-glass); border-radius: 24px; padding: 30px; max-width: 450px; width: 90%; box-shadow: var(--shadow-premium); text-align: center; position: relative;">
+            <button type="button" onclick="cerrarModalLiquidacion()" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; transition: var(--transition-smooth);" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-muted)'">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <h4 class="outfit-font" style="font-weight: 800; font-size: 1.25rem; color: white; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em;">
+                <i class="fa-solid fa-flag-checkered" style="color: var(--primary);"></i> Cierre de Partido
+            </h4>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 25px;">Registra el resultado final oficial para calcular ganadores y distribuir el pozo.</p>
+            
+            {% if partido_liquidado %}
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; border: 1px solid var(--border-glass); text-align: center;">
+                    <span style="color: var(--primary); font-weight: 800; font-size: 1.1rem; display: block; margin-bottom: 10px;"><i class="fa-solid fa-check-circle"></i> PARTIDO LIQUIDADO</span>
+                    <span style="color: var(--text-main); font-size: 0.95rem; display: block; margin-bottom: 5px;">Ganadores: <strong>{{ resumen_liquidacion.ganadores }}</strong></span>
+                    <span style="color: var(--secondary); font-size: 1.1rem; font-weight: 800; display: block;">Premio Repartido: {{ resumen_liquidacion.premio_total }} ⚽</span>
+                </div>
+            {% else %}
+                <form id="form-liquidar" onsubmit="ejecutarLiquidacion(event)">
+                    <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1);">
+                        <label style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 15px;">Ingresar Marcador Final:</label>
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
+                            <input type="number" id="liq_local" min="0" max="99" required placeholder="L" style="width: 70px; height: 50px; font-size: 1.5rem; background: rgba(255,255,255,0.1); border: 1px solid var(--border-glass); color: white; border-radius: 8px; text-align: center; font-family: 'Outfit', sans-serif;">
+                            <span style="font-weight: 900; font-size: 2rem; color: var(--text-muted);">-</span>
+                            <input type="number" id="liq_visit" min="0" max="99" required placeholder="V" style="width: 70px; height: 50px; font-size: 1.5rem; background: rgba(255,255,255,0.1); border: 1px solid var(--border-glass); color: white; border-radius: 8px; text-align: center; font-family: 'Outfit', sans-serif;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-action-inline approve" style="width: 100%; padding: 14px; font-size: 1.05rem; justify-content: center; font-weight: 800; background: linear-gradient(135deg, var(--primary) 0%, hsl(142, 75%, 35%) 100%); color: white; border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); border-radius: 10px;">
+                        <i class="fa-solid fa-gavel"></i> Confirmar y Liquidar Pozo
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 
     <!-- MODAL DE COMPROBANTE PREMIUM (GLASSMORPHIC) [Willys_IA] -->
     <div id="comprobante-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 9999; justify-content: center; align-items: center; animation: fade-in 0.3s ease-out;">
@@ -1110,6 +1136,19 @@
             document.body.removeChild(tempInput);
             alert(`¡Enlace express copiado con éxito!\n\nListo para compartir:\n${inviteLink}`);
         });
+    }
+
+    /**
+     * Abre y cierra el modal de liquidacion [Willys_IA]
+     */
+    function abrirModalLiquidacion() {
+        const modal = document.getElementById('liquidacion-modal');
+        if (modal) modal.style.display = 'flex';
+    }
+    
+    function cerrarModalLiquidacion() {
+        const modal = document.getElementById('liquidacion-modal');
+        if (modal) modal.style.display = 'none';
     }
 
     /**

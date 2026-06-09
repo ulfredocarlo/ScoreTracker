@@ -24,21 +24,21 @@
     /* Estructura del Index Público */
     .hero-section {
         text-align: center;
-        padding: 60px 20px;
+        padding: 20px 20px;
         background: linear-gradient(135deg, hsla(142, 70%, 15%, 0.25) 0%, rgba(15, 23, 42, 0.4) 100%);
         backdrop-filter: blur(var(--blur-strength));
         -webkit-backdrop-filter: blur(var(--blur-strength));
         border: 1px solid var(--border-glass);
-        border-radius: 24px;
-        margin-bottom: 50px;
+        border-radius: 16px;
+        margin-bottom: 25px;
         box-shadow: var(--shadow-premium);
         animation: fade-up 0.5s ease-out;
     }
 
     .hero-section h1 {
-        font-size: 3.5rem;
+        font-size: 2.2rem;
         font-weight: 800;
-        margin-bottom: 16px;
+        margin-bottom: 10px;
         line-height: 1.1;
         background: linear-gradient(135deg, var(--text-main) 30%, var(--secondary) 100%);
         -webkit-background-clip: text;
@@ -53,9 +53,9 @@
 
     .hero-section p {
         color: var(--text-muted);
-        font-size: 1.25rem;
+        font-size: 1rem;
         max-width: 650px;
-        margin: 0 auto 30px auto;
+        margin: 0 auto 15px auto;
     }
 
     /* Botones de Accion del Hero (WOW CTA) */
@@ -934,30 +934,26 @@
     <i class="fa-solid fa-circle-info"></i> VISTA: Fixture Principal de Partidos | Cartelera Pública
 </div>
 
-<!-- CONTENEDOR HERO BIENVENIDA (WOW INTRO) -->
-<div class="hero-section">
-    <h1>Score<span>Tracker</span></h1>
-    <h2 class="outfit-font" style="color: var(--text-main); font-size: 1.8rem; font-weight: 500; margin-bottom: 12px;">
-        Juego Predictivo Colaborativo - Mundial 2026
-    </h2>
-    <p>Organiza grupos cerrados de amigos, concilia aportes en Balones y calcula ganadores de forma 100% transparente y automática. ¡Que ruede el balón!</p>
+<!-- CONTENEDOR HERO BIENVENIDA (SOLO PARA INVITADOS) -->
+{% if not current_user.is_authenticated %}
+<div class="hero-section" style="padding: 25px 20px; margin-bottom: 25px;">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+        <h1 style="margin: 0; font-size: 1.8rem;">Bienvenido a Score<span>Tracker</span></h1>
+    </div>
+    <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 500px; margin: 10px auto 20px auto;">
+        Únete para pronosticar los partidos del Mundial 2026 y competir con tus amigos.
+    </p>
     
     <div class="hero-buttons">
-        {% if current_user.is_authenticated %}
-            <span class="outfit-font" style="color: var(--primary); font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-circle-check"></i> Sesión Activa: {{ current_user.nombre }} ({{ current_user.email }})
-            </span>
-        {% else %}
-            <a href="{{ url_for('main.login_google') }}" class="btn-hero-google">
-                <i class="fa-brands fa-google"></i>
-                Conectar con Google
-            </a>
-            <a href="{{ url_for('main.registro') }}" class="btn-hero-local">
-                Registrar Cuenta Local <i class="fa-solid fa-user-plus"></i>
-            </a>
-        {% endif %}
+        <a href="{{ url_for('main.login_google') }}" class="btn-hero-google" style="padding: 10px 20px; font-size: 0.95rem;">
+            <i class="fa-brands fa-google"></i> Conectar con Google
+        </a>
+        <a href="{{ url_for('main.registro') }}" class="btn-hero-local" style="padding: 10px 20px; font-size: 0.95rem;">
+            Crear Cuenta Local <i class="fa-solid fa-user-plus"></i>
+        </a>
     </div>
 </div>
+{% endif %}
 
 {# El panel de grupos superior se elimina a solicitud para unificar toda la interacción en las filas del Fixture #}
 

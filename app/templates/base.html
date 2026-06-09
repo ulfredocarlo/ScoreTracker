@@ -334,8 +334,11 @@
 
     <!-- Navbar Principal -->
     <nav class="navbar">
-        <a href="/" class="navbar-logo">
-            <i class="fa-solid fa-circle-nodes"></i> Score<span>Tracker</span>
+        <a href="/" class="navbar-logo" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-circle-nodes"></i> Score<span>Tracker</span>
+            </div>
+            <span class="outfit-font" style="color: var(--text-muted); font-size: 0.85rem; border-left: 1px solid var(--border-glass); padding-left: 10px; font-weight: 500;">Juego Predictivo Colaborativo</span>
         </a>
         
         {% if current_user.is_authenticated %}
@@ -416,7 +419,7 @@
 
     <!-- Footer Corporativo -->
     <footer class="footer">
-        <p>&copy; 2026 ScoreTracker. Diseñado con excelencia por <span>Willys_IA</span>. Todos los derechos reservados.</p>
+        <p>&copy; 2026 ScoreTracker. <span>Willys_IA</span>. Todos los derechos reservados.</p>
     </footer>
 
     {% block extra_scripts %}{% endblock %}
