@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Registrarse{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .view-indicator-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-glass);
+        color: var(--text-muted);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 6px 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Tarjeta de Formulario Glassmorphism */
+    .form-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px 0;
+        animation: fade-up 0.5s ease-out;
+    }
+
+    .form-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        box-shadow: var(--shadow-premium);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 480px;
+        padding: 40px;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .form-header h2 {
+        font-size: 2.2rem;
+        color: var(--text-main);
+        margin-bottom: 8px;
+    }
+
+    .form-header h2 span {
+        color: var(--primary);
+    }
+
+    .form-header p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    /* Campos de Entrada Modernos */
+    .form-group {
+        margin-bottom: 24px;
+        position: relative;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-main);
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .form-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-input-wrapper i {
+        position: absolute;
+        left: 16px;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        transition: var(--transition-smooth);
+    }
+
+    .form-control {
+        width: 100%;
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid var(--border-glass);
+        color: var(--text-main);
+        padding: 14px 16px 14px 46px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        transition: var(--transition-smooth);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(15, 23, 42, 0.6);
+        box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .form-control:focus + i {
+        color: var(--primary);
+        filter: drop-shadow(0 0 4px var(--primary));
+    }
+
+    /* Boton de Envio Premium */
+    .btn-submit {
+        width: 100%;
+        background: linear-gradient(135deg, var(--primary) 0%, hsl(142, 75%, 35%) 100%);
+        border: none;
+        color: white;
+        padding: 16px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 4px 20px var(--primary-glow);
+        font-family: 'Outfit', sans-serif;
+        margin-top: 10px;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px hsla(142, 69%, 45%, 0.4);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+    /* Footer del Formulario */
+    .form-footer {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    .form-footer a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition-smooth);
+    }
+
+    .form-footer a:hover {
+        color: var(--text-main);
+        text-decoration: underline;
+    }
+
+    /* Animaciones */
+    @keyframes fade-up {
+        0% {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .form-card {
+            padding: 24px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-wrapper" style="flex-direction: column; align-items: center; padding-top: 20px;">
+    <!-- INDICADOR PRECISO DE VISTA Y FORMULARIO [Willys_IA] -->
+    <div class="view-indicator-badge" style="max-width: 480px;">
+        <i class="fa-solid fa-user-plus"></i> VISTA: Registro de Credenciales | FORMULARIO: Registro de Nuevo Usuario
+    </div>
+
+    <div class="form-card" style="margin-top: 10px;">
+        <div class="form-header">
+            <h2>Crear <span>Cuenta</span></h2>
+            <p>Únete a la plataforma predictiva ScoreTracker</p>
+        </div>
+        
+        <form action="{{ url_for('main.registro', next=request.args.get('next')) }}" method="POST">
+            
+            <div class="form-group">
+                <label class="form-label" for="nombre">Nombre Completo</label>
+                <div class="form-input-wrapper">
+                    <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Ej: Willys" required>
+                    <i class="fa-solid fa-user"></i>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="email">Correo Electrónico</label>
+                <div class="form-input-wrapper">
+                    <input type="email" id="email" name="email" class="form-control" placeholder="usuario@scoretracker.com" required>
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="contrasena">Contraseña</label>
+                <div class="form-input-wrapper">
+                    <input type="password" id="contrasena" name="contrasena" class="form-control" placeholder="••••••••" required>
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-submit">
+                Crear Cuenta <i class="fa-solid fa-user-plus"></i>
+            </button>
+            
+            <!-- Separador elegante -->
+            <div style="display: flex; align-items: center; justify-content: center; margin: 20px 0; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; font-family: 'Outfit'; letter-spacing: 0.05em;">
+                <span style="flex: 1; height: 1px; background: var(--border-glass); margin-right: 15px;"></span>
+                o regístrate con
+                <span style="flex: 1; height: 1px; background: var(--border-glass); margin-left: 15px;"></span>
+            </div>
+            
+            <!-- Boton de Google Premium -->
+            <a href="{{ url_for('main.login_google_mock', next=request.args.get('next')) }}" style="width: 100%; background: white; border: 1px solid #ddd; color: #333; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; text-decoration: none; cursor: pointer; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Outfit', sans-serif;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" style="width: 18px; height: 18px;">
+                Registrarse con Google
+            </a>
+            
+        </form>
+        
+        <div class="form-footer">
+            ¿Ya tienes una cuenta? <a href="{{ url_for('main.login', next=request.args.get('next')) }}">Inicia sesión aquí</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

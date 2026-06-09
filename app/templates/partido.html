@@ -1,0 +1,1132 @@
+{% extends "base.html" %}
+
+{% block title %}Partido: {{ partido.equipo_local }} vs {{ partido.equipo_visitante }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Estructura Unificada de la Vista de Partido [Willys_IA] */
+    .partido-unified-container {
+        animation: fade-up 0.5s ease-out;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .view-indicator-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-glass);
+        color: var(--text-muted);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 6px 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .premium-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow-premium);
+        margin-bottom: 24px;
+    }
+
+    .premium-card h3 {
+        font-size: 1.35rem;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-glass);
+        padding-bottom: 10px;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .premium-card h3 i {
+        color: var(--primary);
+    }
+
+    /* Widget Partido Premium */
+    .widget-match {
+        text-align: center;
+        padding: 30px 20px;
+        background: linear-gradient(135deg, hsla(200, 70%, 15%, 0.2) 0%, rgba(15, 23, 42, 0.6) 100%);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow-premium);
+    }
+
+    .widget-match-fase {
+        font-size: 0.8rem;
+        color: var(--secondary);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    .widget-match-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 2fr;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .widget-team {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .widget-team-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-main);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .widget-versus {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.4rem;
+        color: var(--text-muted);
+    }
+
+    .widget-score {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 2.2rem;
+        color: var(--text-main);
+        letter-spacing: 0.15em;
+        background: rgba(15, 23, 42, 0.6);
+        padding: 6px 16px;
+        border-radius: 10px;
+        border: 1px solid var(--border-glass);
+        display: inline-block;
+    }
+
+    .widget-date {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 10px;
+        margin-top: 10px;
+        display: block;
+    }
+
+    /* Accordion de Reglamento [Willys_IA] */
+    .rules-toggle-btn {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-glass);
+        border-radius: 10px;
+        padding: 12px 20px;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        transition: var(--transition-smooth);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .rules-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+    }
+
+    .rules-accordion-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out;
+        padding: 0 5px;
+        margin-bottom: 0px;
+    }
+
+    .rules-accordion-content.open {
+        max-height: 400px;
+        margin-bottom: 25px;
+    }
+
+    .rules-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .rules-item {
+        background: rgba(15, 23, 42, 0.4);
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--border-glass);
+    }
+
+    .rules-item strong {
+        color: var(--text-main);
+    }
+
+    /* Banner de Aciertos y Resultados [Willys_IA] */
+    .results-banner {
+        background: linear-gradient(135deg, hsla(142, 70%, 15%, 0.25) 0%, rgba(15, 23, 42, 0.8) 100%);
+        border: 1px solid var(--primary);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .results-banner-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--primary);
+    }
+
+    /* Planilla Unificada de Juego (Tabla) [Willys_IA] */
+    .unified-table-wrapper {
+        background: rgba(15, 23, 42, 0.25);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-premium);
+    }
+
+    .unified-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .unified-table th {
+        background: rgba(15, 23, 42, 0.85);
+        color: var(--text-main);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 16px;
+        border-bottom: 1px solid var(--border-glass);
+    }
+
+    .unified-table td {
+        padding: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        font-size: 0.9rem;
+        vertical-align: middle;
+    }
+
+    .unified-table tr:hover {
+        background: rgba(255, 255, 255, 0.01);
+    }
+
+    .unified-table tr.highlight-self {
+        background: rgba(255, 255, 255, 0.03);
+        border-left: 4px solid var(--secondary);
+    }
+
+    /* Badges de Estado y Goles */
+    .predict-badge {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.05rem;
+        padding: 4px 12px;
+        border-radius: 6px;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--border-glass);
+        color: white;
+        display: inline-block;
+    }
+
+    .predict-badge.empty {
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        background: transparent;
+        border-style: dashed;
+    }
+
+    .status-caja {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border: 1px solid transparent;
+    }
+
+    .status-caja.participa {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .status-caja.por-validar {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+        border-color: rgba(59, 130, 246, 0.2);
+    }
+
+    .status-caja.por-pagar {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+        border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    /* Botones de Acción Inline */
+    .btn-action-inline {
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+    }
+
+    .btn-action-inline.modify {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--secondary);
+        border: 1px solid var(--secondary);
+    }
+
+    .btn-action-inline.modify:hover {
+        background: var(--secondary);
+        color: var(--bg-dark);
+    }
+
+    .btn-action-inline.withdraw {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+        border: 1px solid var(--danger);
+        margin-left: 6px;
+    }
+
+    .btn-action-inline.withdraw:hover {
+        background: var(--danger);
+        color: white;
+    }
+
+    .btn-action-inline.approve {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+        border: 1px solid #10b981;
+    }
+
+    .btn-action-inline.approve:hover {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-action-inline.revert {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-muted);
+        border: 1px solid var(--border-glass);
+    }
+
+    .btn-action-inline.revert:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    /* Ganadores y Perdedores */
+    .outcome-badge {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 800;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .outcome-badge.winner {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--secondary);
+        border: 1px solid var(--secondary);
+    }
+
+    .outcome-badge.loser {
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-muted);
+        border: 1px solid var(--border-glass);
+    }
+
+    @media (max-width: 768px) {
+        .unified-table th, .unified-table td {
+            padding: 10px 8px;
+            font-size: 0.8rem;
+        }
+        .btn-action-inline {
+            padding: 4px 8px;
+            font-size: 0.7rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="partido-unified-container">
+    <!-- INDICADOR PRECISO DE VISTA Y FORMULARIO [Willys_IA] -->
+    <div class="view-indicator-badge">
+        <i class="fa-solid fa-circle-info"></i> VISTA: Planilla Unificada de Juego | FORMULARIO: Registrar Pronóstico / Conciliación
+    </div>
+    
+    <!-- DETALLE Y MARCADOR DEL PARTIDO (WIDGET PREMIUM) -->
+    <div class="widget-match">
+        <span class="widget-match-fase">{{ partido.fase or "Mundial 2026" }}</span>
+        <div class="widget-match-grid">
+            <!-- Local -->
+            <div class="widget-team">
+                {{ render_jersey(partido.equipo_local, size=60) | safe }}
+                <img src="https://flagcdn.com/w80/{{ partido.codigo_local }}.png" alt="Bandera {{ partido.equipo_local }}" style="border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); width: 50px; height: auto;">
+                <span class="widget-team-name" style="margin-top: 5px;">{{ partido.equipo_local }}</span>
+            </div>
+            
+            <!-- VS o Score -->
+            <div class="widget-versus">
+                {% if partido.estado in ['Terminado', 'Liquidado'] %}
+                    <div class="widget-score">{{ partido.marcador }}</div>
+                {% else %}
+                    VS
+                {% endif %}
+            </div>
+            
+            <!-- Visitante -->
+            <div class="widget-team">
+                {{ render_jersey(partido.equipo_visitante, size=60) | safe }}
+                <img src="https://flagcdn.com/w80/{{ partido.codigo_visitante }}.png" alt="Bandera {{ partido.equipo_visitante }}" style="border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); width: 50px; height: auto;">
+                <span class="widget-team-name" style="margin-top: 5px;">{{ partido.equipo_visitante }}</span>
+            </div>
+        </div>
+        <span class="widget-date">
+            <i class="fa-solid fa-calendar-day" style="margin-right: 6px;"></i> 
+            {{ partido.fecha_hora.strftime('%d de %B - %H:%M') }} UTC 
+            {% if partido.lugar %}
+            | <i class="fa-solid fa-location-dot" style="margin-left: 4px; margin-right: 4px; color: var(--primary);"></i> Sede: <strong>{{ partido.lugar }}</strong>
+            {% endif %}
+            | Estado: <strong style="color: var(--secondary);">{{ partido.estado }}</strong>
+        </span>
+    </div>
+
+
+
+    <!-- ========================================================
+       2. RESOLUCIÓN DE JUEGO (QUIEN GANÓ / PERDIÓ) [Willys_IA]
+       ======================================================== -->
+    {% if partido.estado in ['Terminado', 'Liquidado'] %}
+        <div class="results-banner">
+            <div class="results-banner-icon">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+                <h4 class="outfit-font" style="font-size: 1.15rem; font-weight: 800; color: white; margin-bottom: 4px;">¡Resultado del Partido!</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                    El partido ha finalizado. Marcador Oficial: <strong>{{ partido.marcador }}</strong>. 
+                    {% if partido.estado == 'Liquidado' %}
+                        El pozo acumulado ha sido distribuido equitativamente entre quienes acertaron.
+                    {% else %}
+                        El pozo está listo para ser liquidado por el Tesorero.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- ========================================================
+       3. PLANILLA UNIFICADA DE PARTICIPANTES [Willys_IA]
+       ======================================================== -->
+    <div class="premium-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 15px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <i class="fa-solid fa-people-group" style="color: var(--primary);"></i> 
+                Planilla Unificada: {{ grupo.nombre }} 
+                <span class="group-badge badge-c" style="font-size: 0.8rem; font-weight: 800; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" onclick="copiarCodigoInvitacion('{{ grupo.codigo_invitacion }}')" title="Haz clic para copiar únicamente el código de invitación">
+                    <i class="fa-solid fa-key"></i> Código: {{ grupo.codigo_invitacion }}
+                </span>
+                <span style="font-size: 0.9rem; color: var(--secondary); font-weight: 700;">(Aporte: {{ grupo.balones_aporte }} Balones)</span>
+            </h3>
+            
+            <div style="display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <!-- BOTÓN VER REGLAMENTO (A LA ALTURA DE MODIFICAR REGLAMENTO) [Willys_IA] -->
+                <button type="button" class="btn-action-inline revert" onclick="toggleRulesAccordion()" style="padding: 8px 16px; font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-scale-balanced" style="color: var(--secondary);"></i> Ver Reglamento
+                </button>
+
+                <!-- BOTÓN COMPARTIR WHATSAPP [Willys_IA] -->
+                <button type="button" id="share-whatsapp-btn" onclick="compartirWhatsApp('{{ grupo.codigo_invitacion }}', '{{ grupo.nombre }}', '{{ partido.id }}')" style="background: rgba(37, 211, 102, 0.15); color: #25D366; border: 1px solid #25D366; padding: 8px 16px; font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px;" title="Invitar amigos por WhatsApp con mensaje predeterminado">
+                    <i class="fa-brands fa-whatsapp" style="font-size: 0.95rem;"></i> Invitar por WhatsApp
+                </button>
+
+                <!-- BOTÓN COPIAR ENLACE EXPRESS [Willys_IA] -->
+                <button type="button" id="share-invite-btn" data-code="{{ grupo.codigo_invitacion }}" data-partido-id="{{ partido.id }}" onclick="copiarEnlaceInvitacion('{{ grupo.codigo_invitacion }}', '{{ partido.id }}')" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; padding: 8px 16px; font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-link"></i> Copiar Enlace
+                </button>
+
+                {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] %}
+                    <!-- BOTÓN MODIFICAR REGLAMENTO (PASANDO EL PARTIDO_ID COMO QUERYS) [Willys_IA] -->
+                    <a href="{{ url_for('main.editar_reglas', grupo_id=grupo.id, partido_id=partido.id) }}" class="btn-action-inline modify" style="padding: 8px 16px; font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-gear"></i> Modificar Reglamento
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ACORDEÓN DE REGLAMENTO INTERNO (AHORA DENTRO DE LA TARJETA) [Willys_IA] -->
+        <div class="rules-accordion-content" id="rules-accordion-content" style="margin-bottom: 0; transition: max-height 0.4s ease-out;">
+            <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--border-glass); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                <div class="rules-grid">
+                    <div class="rules-item">
+                        Aporte: <strong>{{ grupo.balones_aporte }} Balones</strong>
+                    </div>
+                    <div class="rules-item">
+                        Equivalencia: <strong>1 ⚽ = {{ grupo.balon_equivalencia }} {{ grupo.moneda_codigo }}</strong>
+                    </div>
+                    <div class="rules-item">
+                        Modalidad: <strong>{{ grupo.tipo_juego }}</strong>
+                    </div>
+                    <div class="rules-item" style="grid-column: span 3; font-style: italic; border-left: 3px solid var(--secondary); margin-top: 8px;">
+                        Tesorero (Datos de Pago): <strong>{{ grupo.datos_pago_tesorero }}</strong>
+                    </div>
+                    {% if grupo.qr_pago_path %}
+                        <div class="rules-item" style="grid-column: span 3; text-align: center; margin-top: 8px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-glass); padding: 15px; border-radius: 12px;">
+                            <span style="font-size: 0.75rem; color: var(--secondary); font-weight: 700; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">
+                                <i class="fa-solid fa-qrcode"></i> Código QR de Pago Oficial
+                            </span>
+                            <img src="{{ url_for('static', filename=grupo.qr_pago_path) }}" alt="QR de Pago" style="max-width: 180px; height: auto; border-radius: 8px; border: 2px solid rgba(255,255,255,0.1); box-shadow: var(--shadow-premium);">
+                            <span style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-top: 5px;">Escanea este código con tu app bancaria para transferir.</span>
+                        </div>
+                    {% endif %}
+                    {% if grupo.acuerdos_especiales %}
+                        <div class="rules-item" style="grid-column: span 3; font-style: italic; border-left: 3px solid var(--primary); margin-top: 8px;">
+                            Acuerdo Especial: <strong>"{{ grupo.acuerdos_especiales }}"</strong>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DE LIQUIDACIÓN Y CIERRE DE PARTIDO [Willys_IA] -->
+        {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] %}
+            <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid var(--primary); border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h3 style="margin: 0 0 5px 0; color: var(--primary); font-size: 1.2rem;"><i class="fa-solid fa-flag-checkered"></i> Cierre de Partido</h3>
+                        <p style="margin: 0; color: var(--text-muted); font-size: 0.85rem;">Registra el resultado final oficial para calcular ganadores y distribuir el pozo.</p>
+                    </div>
+                    
+                    {% if partido_liquidado %}
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 12px 20px; border-radius: 8px; border: 1px solid var(--border-glass); text-align: center;">
+                            <span style="color: var(--primary); font-weight: 700; display: block; margin-bottom: 5px;"><i class="fa-solid fa-check-circle"></i> PARTIDO LIQUIDADO</span>
+                            <span style="color: var(--text-main); font-size: 0.85rem;">Ganadores: <strong>{{ resumen_liquidacion.ganadores }}</strong> | Premio Repartido: <strong>{{ resumen_liquidacion.premio_total }} ⚽</strong></span>
+                        </div>
+                    {% else %}
+                        <form id="form-liquidar" style="display: flex; gap: 10px; align-items: center;" onsubmit="ejecutarLiquidacion(event)">
+                            <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);">Resultado Oficial:</label>
+                                <input type="number" id="liq_local" min="0" max="99" required placeholder="L" style="width: 50px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-glass); color: white; border-radius: 4px; padding: 5px; text-align: center; font-family: 'Outfit', sans-serif;">
+                                <span style="font-weight: 900; color: var(--text-muted);">-</span>
+                                <input type="number" id="liq_visit" min="0" max="99" required placeholder="V" style="width: 50px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-glass); color: white; border-radius: 4px; padding: 5px; text-align: center; font-family: 'Outfit', sans-serif;">
+                            </div>
+                            <button type="submit" class="btn-action-inline approve" style="padding: 10px 20px; font-weight: 700; background: var(--primary); color: #0f172a; border: none;">
+                                <i class="fa-solid fa-gavel"></i> Liquidar Pozo
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+            Muestra el listado de miembros del grupo, sus pronósticos, comprobantes de pago offline y conciliaciones del Tesorero.
+        </p>
+
+        <div class="unified-table-wrapper">
+            <table class="unified-table">
+                <thead>
+                    <tr>
+                        <th>Miembro</th>
+                        <th>Pronóstico</th>
+                        <th>Aporte Offline</th>
+                        <th>Estado Pago</th>
+                        {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] %}
+                            <th style="text-align: right;">Acciones Tesorero</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in participantes_grupo %}
+                        {% set pred = todas_predicciones | selectattr('usuario_id', 'equalto', p.usuario_id) | first %}
+                        {% set caja_estado = caja_map.get(p.usuario_id, 'Por Pagar') %}
+                        {% set es_el_usuario_logueado = p.usuario_id == current_user.id %}
+                        
+                        <!-- Calcular si es Ganador / Perdedor para mostrar el feedback oficial [Willys_IA] -->
+                        {% set es_ganador = false %}
+                        {% if partido.estado in ['Terminado', 'Liquidado'] and pred %}
+                            {% if grupo.tipo_juego == 'Marcador' %}
+                                {% if pred.valor_prediccion == partido.marcador %}
+                                    {% set es_ganador = true %}
+                                {% endif %}
+                            {% else %}
+                                {% set scores = partido.marcador.split('-') %}
+                                {% set res_oficial = 'Empate' %}
+                                {% if scores[0]|int > scores[1]|int %}
+                                    {% set res_oficial = 'Local gana' %}
+                                {% elif scores[0]|int < scores[1]|int %}
+                                    {% set res_oficial = 'Visitante gana' %}
+                                {% endif %}
+                                {% if pred.valor_prediccion == res_oficial %}
+                                    {% set es_ganador = true %}
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+
+                        <tr class="{% if es_el_usuario_logueado %}highlight-self{% endif %}" id="row-caja-{{ p.usuario_id }}">
+                            <!-- 1. Nombre Miembro -->
+                            <td>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="player-name">
+                                        {{ p.usuario.nombre }}
+                                        {% if p.usuario_id == grupo.admin_id %}
+                                            <i class="fa-solid fa-crown" style="color: var(--secondary); font-size: 0.75rem; margin-left: 4px;" title="Tesorero / Administrador"></i>
+                                        {% endif %}
+                                    </span>
+                                    <!-- Si el partido ya concluyó, mostrar tag de Ganador / Perdedor -->
+                                    {% if partido.estado in ['Terminado', 'Liquidado'] %}
+                                        {% if pred %}
+                                            {% if es_ganador %}
+                                                <span class="outcome-badge winner" style="margin-top: 4px; width: fit-content;">
+                                                    <i class="fa-solid fa-star"></i> Ganador
+                                                </span>
+                                            {% else %}
+                                                <span class="outcome-badge loser" style="margin-top: 4px; width: fit-content;">
+                                                    <i class="fa-solid fa-circle-xmark"></i> Perdedor
+                                                </span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="outcome-badge loser" style="margin-top: 4px; width: fit-content;">
+                                                <i class="fa-solid fa-circle-minus"></i> No jugó
+                                            </span>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <!-- 2. Pronóstico del Marcador -->
+                            <td>
+                                {% if pred %}
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <!-- Transparencia Radical: Todos los pronósticos son visibles en tiempo real [Willys_IA] -->
+                                        {% if es_el_usuario_logueado and partido.estado == 'Abierto' %}
+                                            <a href="{{ url_for('main.jugar_existente', partido_id=partido.id) }}" class="predict-badge" style="cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; transition: all 0.2s;" title="Haz clic para modificar tu pronóstico" onmouseover="this.style.transform='scale(1.05)'; this.style.borderColor='var(--secondary)';" onmouseout="this.style.transform='scale(1)'; this.style.borderColor='';">
+                                                {{ pred.valor_prediccion }} <i class="fa-solid fa-pen" style="font-size: 0.75rem; margin-left: 6px; opacity: 0.6;"></i>
+                                            </a>
+                                        {% else %}
+                                            <span class="predict-badge">
+                                                {{ pred.valor_prediccion }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <!-- Si no ha jugado aún -->
+                                    {% if es_el_usuario_logueado and partido.estado == 'Abierto' %}
+                                        <a href="{{ url_for('main.jugar_existente', partido_id=partido.id) }}" class="btn-action-inline modify" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981;" title="Registrar Predicción">
+                                            <i class="fa-solid fa-gamepad"></i> Jugar
+                                        </a>
+                                    {% else %}
+                                        <span class="predict-badge empty">
+                                            No juega
+                                        </span>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+
+                            <!-- 3. Comprobante Offline [Willys_IA] -->
+                            <td>
+                                {% if pred %}
+                                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                                            <span style="font-size: 0.8rem; color: var(--text-main); font-weight: 700;">
+                                                <i class="fa-solid fa-coins" style="color: #f59e0b;"></i> {{ grupo.balones_aporte }} Balones
+                                            </span>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span style="font-size: 0.75rem; color: var(--text-muted); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ pred.comprobante_pago }}">
+                                                    {{ pred.comprobante_pago }}
+                                                </span>
+                                                {% if pred.comprobante_path %}
+                                                    <button type="button" class="btn-action-inline modify" onclick="verComprobanteModal('{{ p.usuario.nombre }}', '{{ pred.comprobante_pago }}', '{{ pred.comprobante_path }}', {{ p.usuario_id }}, '{{ caja_estado }}')" style="padding: 4px 8px; font-size: 0.7rem; border-radius: 4px;" title="Ver Captura del Depósito Bancario">
+                                                        <i class="fa-solid fa-eye"></i> Recibo
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                {% else %}
+                                    <span style="color: var(--text-muted);">--</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- 4. Estado de Pago / Conciliación -->
+                            <td>
+                                {% if pred %}
+                                    {% if es_el_usuario_logueado and caja_estado == 'Por Pagar' %}
+                                        <!-- Botón para subir comprobante (Abre Modal) -->
+                                        <button class="status-caja por-pagar" style="cursor: pointer; transition: all 0.2s;" onclick="abrirModalSubidaPago()" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i> Pagar
+                                        </button>
+                                    {% else %}
+                                        <span class="status-caja {{ caja_estado | replace(' ', '-') | lower }}" id="badge-caja-{{ p.usuario_id }}">
+                                            <i class="fa-solid {% if caja_estado == 'Participa' %}fa-circle-check{% elif caja_estado == 'Por Validar' %}fa-magnifying-glass{% else %}fa-clock{% endif %}"></i>
+                                            {{ caja_estado }}
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="status-caja por-pagar" style="background: rgba(255,255,255,0.02); color: var(--text-muted); border-color: var(--border-glass);">
+                                        --
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] %}
+                                <td style="text-align: right;">
+                                    {% if pred %}
+                                        <div style="display: inline-flex; justify-content: flex-end; gap: 6px;" id="caja-actions-{{ p.usuario_id }}">
+                                            {% if caja_estado == 'Por Validar' %}
+                                                <button class="btn-action-inline approve" onclick="cambiarEstadoCaja({{ p.usuario_id }}, 'Participa')" title="Aprobar pago">
+                                                    <i class="fa-solid fa-check"></i> Validar
+                                                </button>
+                                                <button class="btn-action-inline withdraw" onclick="cambiarEstadoCaja({{ p.usuario_id }}, 'Por Pagar')" title="Rechazar pago (Invalido)">
+                                                    <i class="fa-solid fa-xmark"></i> Rechazar
+                                                </button>
+                                            {% elif caja_estado == 'Participa' %}
+                                                <button class="btn-action-inline revert" onclick="cambiarEstadoCaja({{ p.usuario_id }}, 'Por Pagar')" title="Revertir y requerir pago nuevamente">
+                                                    <i class="fa-solid fa-arrow-rotate-left"></i> Revertir a Por Pagar
+                                                </button>
+                                            {% else %}
+                                                <span style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-clock"></i> Esperando Pago</span>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span style="font-size: 0.75rem; color: var(--text-muted);">Sin predicción</span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Volver al Fixture -->
+    <div style="text-align: center; margin-top: 20px; margin-bottom: 30px;">
+        <a href="{{ url_for('main.index') }}" class="btn-back">
+            <i class="fa-solid fa-calendar-days"></i> Volver al Fixture
+        </a>
+    </div>
+
+    <!-- MODAL PARA SUBIR COMPROBANTE O EFECTIVO [Willys_IA] -->
+    <div id="subida-pago-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 9999; justify-content: center; align-items: center; animation: fade-in 0.3s ease-out;">
+        <div style="background: rgba(30, 41, 59, 0.75); border: 1px solid var(--border-glass); border-radius: 24px; padding: 30px; max-width: 450px; width: 90%; box-shadow: var(--shadow-premium); text-align: center; position: relative;">
+            <button type="button" onclick="cerrarModalSubidaPago()" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; transition: var(--transition-smooth);" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-muted)'">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <h4 class="outfit-font" style="font-weight: 800; font-size: 1.25rem; color: white; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em;">
+                <i class="fa-solid fa-wallet" style="color: var(--secondary);"></i> Realizar Aporte
+            </h4>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button type="button" id="btn-tab-qr" onclick="togglePaymentMode('qr')" style="flex: 1; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--primary); cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 700;">
+                    <i class="fa-solid fa-qrcode"></i> Digital/QR
+                </button>
+                <button type="button" id="btn-tab-efectivo" onclick="togglePaymentMode('efectivo')" style="flex: 1; padding: 10px; border-radius: 8px; background: transparent; color: var(--text-muted); border: 1px solid var(--border-glass); cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 700;">
+                    <i class="fa-solid fa-money-bill"></i> Efectivo
+                </button>
+            </div>
+
+            <!-- MODO DIGITAL/QR -->
+            <div id="pago-modo-qr">
+                {% if grupo.qr_pago_path %}
+                    <div style="background: rgba(0,0,0,0.25); border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px dashed var(--border-glass); display: flex; flex-direction: column; align-items: center;">
+                        <span style="font-size: 0.75rem; color: var(--secondary); font-weight: 700; margin-bottom: 10px; text-transform: uppercase;"><i class="fa-solid fa-camera"></i> QR de Tesorería</span>
+                        <img src="{{ url_for('static', filename=grupo.qr_pago_path) }}" alt="QR de Pago" style="max-width: 150px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                    </div>
+                {% else %}
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Instrucciones: {{ grupo.datos_pago_tesorero }}</p>
+                {% endif %}
+                
+                <form id="form-subida-pago" onsubmit="submitPago(event)" enctype="multipart/form-data">
+                    <input type="hidden" name="metodo" id="pago-metodo-input" value="qr">
+                    
+                    <div style="text-align: left; margin-bottom: 20px;">
+                        <label style="font-size: 0.8rem; color: var(--text-main); font-weight: 600; display: block; margin-bottom: 8px;">Sube la captura de tu transferencia:</label>
+                        <input type="file" name="comprobante_image" id="comprobante_image" accept="image/*" required style="width: 100%; background: rgba(30,41,59,0.5); border: 1px solid var(--border-glass); border-radius: 8px; padding: 10px; color: var(--text-muted);">
+                    </div>
+                    
+                    <button type="submit" class="btn-action-inline approve" style="width: 100%; padding: 12px; justify-content: center; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Enviar Comprobante
+                    </button>
+                </form>
+            </div>
+
+            <!-- MODO EFECTIVO -->
+            <div id="pago-modo-efectivo" style="display: none;">
+                <div style="background: rgba(245, 158, 11, 0.1); border: 1px dashed rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                    <i class="fa-solid fa-hand-holding-dollar" style="font-size: 2rem; color: #f59e0b; margin-bottom: 15px;"></i>
+                    <p style="font-size: 0.9rem; color: var(--text-main); margin: 0;">Al seleccionar esta opción, te comprometes a entregar el aporte en físico al Tesorero antes del inicio del partido.</p>
+                </div>
+                
+                <button type="button" class="btn-action-inline approve" onclick="submitPagoEfectivo()" style="width: 100%; padding: 12px; justify-content: center; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                    <i class="fa-solid fa-check"></i> Notificar Pago en Efectivo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE COMPROBANTE PREMIUM (GLASSMORPHIC) [Willys_IA] -->
+    <div id="comprobante-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 9999; justify-content: center; align-items: center; animation: fade-in 0.3s ease-out;">
+        <div style="background: rgba(30, 41, 59, 0.75); border: 1px solid var(--border-glass); border-radius: 24px; padding: 30px; max-width: 450px; width: 90%; box-shadow: var(--shadow-premium); text-align: center; position: relative;">
+            <button type="button" onclick="cerrarComprobanteModal()" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; transition: var(--transition-smooth);" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-muted)'">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <h4 class="outfit-font" style="font-weight: 800; font-size: 1.25rem; color: white; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em;">
+                <i class="fa-solid fa-receipt" style="color: var(--secondary);"></i> Recibo de Aporte
+            </h4>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">
+                Jugador: <strong id="modal-jugador-name" style="color: white; font-family: 'Outfit', sans-serif;">--</strong>
+            </p>
+
+            <div style="background: rgba(15,23,42,0.6); border-radius: 16px; padding: 12px; margin-bottom: 20px; border: 1px dashed var(--border-glass); display: flex; justify-content: center; align-items: center;">
+                <img id="modal-receipt-img" src="" alt="Captura de transferencia" style="max-width: 100%; max-height: 280px; border-radius: 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); object-fit: contain;">
+            </div>
+
+            <!-- Botones de Acción (Visibles/Habilitados según rol del usuario) -->
+            <div id="modal-actions-container" style="display: flex; gap: 12px; justify-content: center;">
+                <button type="button" class="btn-action-inline revert" onclick="cerrarComprobanteModal()" style="font-size: 0.9rem; padding: 12px 24px; border-radius: 10px; flex: 1; justify-content: center;">
+                    Cerrar
+                </button>
+                {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] %}
+                    <button type="button" id="modal-btn-validate" class="btn-action-inline approve" onclick="ejecutarValidacionModal()" style="font-size: 0.9rem; padding: 12px 24px; border-radius: 10px; flex: 1; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                        <i class="fa-solid fa-check"></i> Validar Pago
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    /**
+     * Alternar la visualización del reglamento del grupo. [Willys_IA]
+     */
+    function toggleRulesAccordion() {
+        const content = document.getElementById('rules-accordion-content');
+        const chevron = document.getElementById('rules-chevron');
+        
+        if (content.classList.contains('open')) {
+            content.classList.remove('open');
+            if(chevron) chevron.style.transform = 'rotate(0deg)';
+        } else {
+            content.classList.add('open');
+            if(chevron) chevron.style.transform = 'rotate(180deg)';
+        }
+    }
+
+    /**
+     * Lógica para el modal de PAGO [Willys_IA]
+     */
+    function abrirModalSubidaPago() {
+        document.getElementById('subida-pago-modal').style.display = 'flex';
+    }
+
+    function cerrarModalSubidaPago() {
+        document.getElementById('subida-pago-modal').style.display = 'none';
+        document.getElementById('form-subida-pago').reset();
+    }
+
+    function togglePaymentMode(mode) {
+        const btnQr = document.getElementById('btn-tab-qr');
+        const btnEf = document.getElementById('btn-tab-efectivo');
+        const divQr = document.getElementById('pago-modo-qr');
+        const divEf = document.getElementById('pago-modo-efectivo');
+        const inputMetodo = document.getElementById('pago-metodo-input');
+
+        if (mode === 'qr') {
+            btnQr.style.background = 'rgba(255,255,255,0.1)';
+            btnQr.style.color = 'white';
+            btnQr.style.borderColor = 'var(--primary)';
+            
+            btnEf.style.background = 'transparent';
+            btnEf.style.color = 'var(--text-muted)';
+            btnEf.style.borderColor = 'var(--border-glass)';
+            
+            divQr.style.display = 'block';
+            divEf.style.display = 'none';
+            inputMetodo.value = 'qr';
+            document.getElementById('comprobante_image').required = true;
+        } else {
+            btnEf.style.background = 'rgba(255,255,255,0.1)';
+            btnEf.style.color = 'white';
+            btnEf.style.borderColor = '#f59e0b';
+            
+            btnQr.style.background = 'transparent';
+            btnQr.style.color = 'var(--text-muted)';
+            btnQr.style.borderColor = 'var(--border-glass)';
+            
+            divEf.style.display = 'block';
+            divQr.style.display = 'none';
+            inputMetodo.value = 'efectivo';
+            document.getElementById('comprobante_image').required = false;
+        }
+    }
+
+    function submitPagoEfectivo() {
+        const formData = new FormData();
+        formData.append('metodo', 'efectivo');
+        enviarPago(formData);
+    }
+
+    function submitPago(event) {
+        event.preventDefault();
+        const form = document.getElementById('form-subida-pago');
+        const formData = new FormData(form);
+        enviarPago(formData);
+    }
+
+    function enviarPago(formData) {
+        const url = `/api/grupo/{{ grupo.id }}/partido/{{ partido.id }}/subir_comprobante`;
+        
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Recargar para ver los cambios de estado
+            } else {
+                alert('Error al enviar: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión al enviar el pago.');
+        });
+    }
+
+    /**
+     * API Fetch AJAX para conciliaciones asíncronas del Tesorero in-situ. [Willys_IA]
+     */
+    function cambiarEstadoCaja(usuarioId, nuevoEstado) {
+        const url = `/api/grupo/{{ grupo.id }}/partido/{{ partido.id }}/conciliar`;
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                usuario_id: usuarioId,
+                estado: nuevoEstado
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Simplemente recargamos la pagina para evitar lios de UI [Willys_IA]
+                location.reload();
+            } else {
+                alert(`Error al conciliar: ${data.error}`);
+            }
+        })
+        .catch(err => {
+            console.error("[Willys_IA] Error en AJAX conciliación:", err);
+            alert("Error al conectar con el servidor.");
+        });
+    }
+
+    // Variables de control de estado del comprobante abierto en modal [Willys_IA]
+    let activeModalUsuarioId = null;
+
+    /**
+     * Abre el modal glassmorphic de auditoría de comprobantes y carga sus datos. [Willys_IA]
+     */
+    function verComprobanteModal(nombreJugador, referencia, pathComprobante, usuarioId, estadoPago) {
+        activeModalUsuarioId = usuarioId;
+        
+        document.getElementById('modal-jugador-name').textContent = nombreJugador;
+        document.getElementById('modal-reference-text').textContent = referencia || 'Sin referencia declarada';
+        document.getElementById('modal-receipt-img').src = '/static/' + pathComprobante;
+        
+        // Configurar botón de validación según el estado actual [Willys_IA]
+        const validateBtn = document.getElementById('modal-btn-validate');
+        if (validateBtn) {
+            // Obtener el estado actual del badge real de la tabla
+            const currentBadge = document.getElementById(`badge-caja-${usuarioId}`);
+            const isCurrentlyParticipa = currentBadge && currentBadge.classList.contains('participa');
+            
+            if (isCurrentlyParticipa) {
+                validateBtn.innerHTML = `<i class="fa-solid fa-arrow-rotate-left"></i> Revertir Pago`;
+                // Estilo revert (gris transparente)
+                validateBtn.style.background = "rgba(255, 255, 255, 0.05)";
+                validateBtn.style.color = "var(--text-muted)";
+                validateBtn.style.borderColor = "var(--border-glass)";
+                validateBtn.style.boxShadow = "none";
+                validateBtn.onclick = function() {
+                    cambiarEstadoCaja(usuarioId, 'Pasivo');
+                    cerrarComprobanteModal();
+                };
+            } else {
+                validateBtn.innerHTML = `<i class="fa-solid fa-check"></i> Validar Pago`;
+                // Estilo approve (verde esmeralda)
+                validateBtn.style.background = "rgba(16, 185, 129, 0.15)";
+                validateBtn.style.color = "#10b981";
+                validateBtn.style.borderColor = "#10b981";
+                validateBtn.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.2)";
+                validateBtn.onclick = function() {
+                    cambiarEstadoCaja(usuarioId, 'Participa');
+                    cerrarComprobanteModal();
+                };
+            }
+        }
+        
+        // Desplegar modal
+        const modal = document.getElementById('comprobante-modal');
+        modal.style.display = 'flex';
+    }
+
+    /**
+     * Cierra el modal de comprobantes. [Willys_IA]
+     */
+    function cerrarComprobanteModal() {
+        const modal = document.getElementById('comprobante-modal');
+        modal.style.display = 'none';
+        activeModalUsuarioId = null;
+    }
+
+    /**
+     * Ejecuta la validación rápida del Tesorero desde el modal. [Willys_IA]
+     */
+    function ejecutarValidacionModal() {
+        if (activeModalUsuarioId) {
+            cambiarEstadoCaja(activeModalUsuarioId, 'Participa');
+            cerrarComprobanteModal();
+        }
+    }
+
+    /**
+     * Envía una invitación pre-formateada directamente a través de WhatsApp. [Willys_IA]
+     */
+    function compartirWhatsApp(codigo, grupoNombre, partidoId) {
+        const host = window.location.origin;
+        let inviteLink = `${host}/invitacion/${codigo}`;
+        if (partidoId) {
+            inviteLink += `?partido_id=${partidoId}`;
+        }
+        const textShare = `¡Hola! Te invito a unirte a mi grupo cerrado de juego "${grupoNombre}" en ScoreTracker para pronosticar los partidos del Mundial 2026.\n\nCódigo de invitación: *${codigo}*\n\nIngresa directamente y regístrate usando este enlace:\n${inviteLink}`;
+        
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(textShare)}`;
+        window.open(whatsappUrl, '_blank');
+    }
+
+    /**
+     * Copia quirúrgicamente únicamente el código bruto de invitación al portapapeles. [Willys_IA]
+     */
+    function copiarCodigoInvitacion(codigo) {
+        navigator.clipboard.writeText(codigo).then(() => {
+            alert(`¡Código de invitación copiado con éxito!\n\nCódigo: ${codigo}`);
+        }).catch(err => {
+            console.error("Error al copiar código:", err);
+            // Fallback para navegadores antiguos
+            const tempInput = document.createElement("input");
+            tempInput.value = codigo;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            alert(`¡Código de invitación copiado con éxito!\n\nCódigo: ${codigo}`);
+        });
+    }
+
+    /**
+     * Copia quirúrgicamente únicamente el link de invitación al portapapeles. [Willys_IA]
+     */
+    function copiarEnlaceInvitacion(codigo, partidoId) {
+        const host = window.location.origin;
+        let inviteLink = `${host}/invitacion/${codigo}`;
+        if (partidoId) {
+            inviteLink += `?partido_id=${partidoId}`;
+        }
+        
+        navigator.clipboard.writeText(inviteLink).then(() => {
+            alert(`¡Enlace express copiado con éxito!\n\nListo para compartir:\n${inviteLink}`);
+        }).catch(err => {
+            console.error("Error al copiar enlace:", err);
+            // Fallback para navegadores antiguos o entornos locales HTTP restrictivos
+            const tempInput = document.createElement("input");
+            tempInput.value = inviteLink;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            alert(`¡Enlace express copiado con éxito!\n\nListo para compartir:\n${inviteLink}`);
+        });
+    }
+
+    /**
+     * Inicializar dinámicamente el tooltip con la URL simulada al acercar el mouse. [Willys_IA]
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+        const shareBtn = document.getElementById('share-invite-btn');
+        if (shareBtn) {
+            const host = window.location.origin;
+            const code = shareBtn.getAttribute('data-code');
+            const partidoId = shareBtn.getAttribute('data-partido-id');
+            let simulatedUrl = `${host}/invitacion/${code}`;
+            if (partidoId) {
+                simulatedUrl += `?partido_id=${partidoId}`;
+            }
+            shareBtn.setAttribute('title', `Copiar enlace express: ${simulatedUrl}`);
+        }
+    });
+</script>
+{% endblock %}

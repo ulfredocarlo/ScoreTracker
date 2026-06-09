@@ -1,0 +1,1263 @@
+{% extends "base.html" %}
+
+{% block title %}Fixture Mundial 2026{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .view-indicator-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-glass);
+        color: var(--text-muted);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 6px 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    /* Estructura del Index Público */
+    .hero-section {
+        text-align: center;
+        padding: 60px 20px;
+        background: linear-gradient(135deg, hsla(142, 70%, 15%, 0.25) 0%, rgba(15, 23, 42, 0.4) 100%);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        border-radius: 24px;
+        margin-bottom: 50px;
+        box-shadow: var(--shadow-premium);
+        animation: fade-up 0.5s ease-out;
+    }
+
+    .hero-section h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 16px;
+        line-height: 1.1;
+        background: linear-gradient(135deg, var(--text-main) 30%, var(--secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-section h1 span {
+        background: linear-gradient(135deg, var(--primary) 0%, hsl(142, 80%, 60%) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-section p {
+        color: var(--text-muted);
+        font-size: 1.25rem;
+        max-width: 650px;
+        margin: 0 auto 30px auto;
+    }
+
+    /* Botones de Accion del Hero (WOW CTA) */
+    .hero-buttons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .btn-hero-google {
+        background: white;
+        border: 1px solid #ddd;
+        color: #333;
+        padding: 16px 32px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 1.05rem;
+        text-decoration: none;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .btn-hero-google:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+    }
+
+    .btn-hero-local {
+        background: linear-gradient(135deg, var(--primary) 0%, hsl(142, 75%, 35%) 100%);
+        color: white;
+        border: none;
+        padding: 16px 32px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 1.05rem;
+        text-decoration: none;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 10px 25px var(--primary-glow);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .btn-hero-local:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px hsla(142, 69%, 45%, 0.4);
+    }
+
+    /* Seccion del Fixture Público */
+    .fixture-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--border-glass);
+        padding-bottom: 15px;
+    }
+
+    .fixture-section-header h2 {
+        font-size: 2rem;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .fixture-section-header h2 i {
+        color: var(--primary);
+        filter: drop-shadow(0 0 5px var(--primary));
+    }
+
+    .fixture-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 24px;
+        animation: fade-up 0.7s ease-out;
+    }
+
+    /* Tarjeta de Partido Público (Factor WOW) */
+    .public-match-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow-premium);
+        transition: var(--transition-smooth);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .public-match-card:hover {
+        border-color: var(--primary);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px var(--primary-glow);
+    }
+
+    .public-match-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent), var(--primary));
+        opacity: 0.7;
+    }
+
+    .match-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .match-fase {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+    }
+
+    .match-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .match-badge.abierto {
+        background: var(--primary-glow);
+        color: var(--primary);
+        border: 1px solid var(--primary);
+    }
+
+    .match-badge.programado {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-muted);
+        border: 1px solid var(--border-glass);
+    }
+
+    /* Grilla de Equipos */
+    .match-teams-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 2fr;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .match-team-column {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .match-team-column img {
+        border-radius: 6px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        width: 44px;
+        height: auto;
+        transition: var(--transition-smooth);
+    }
+
+    .public-match-card:hover .match-team-column img {
+        transform: scale(1.08);
+    }
+
+    .match-team-column i {
+        font-size: 2.2rem;
+    }
+
+    .match-team-name {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text-main);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .match-versus-lbl {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: var(--border-glass);
+    }
+
+    /* Footer de la tarjeta */
+    .match-footer-row {
+        border-top: 1px solid rgba(255, 255, 255, 0.04);
+        padding-top: 15px;
+        margin-top: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .match-time-lbl {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .btn-action-lock {
+        background: transparent;
+        border: 1px solid var(--border-glass);
+        color: var(--text-muted);
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-action-lock i {
+        color: var(--secondary);
+    }
+
+    @keyframes fade-up {
+        0% {
+            transform: translateY(40px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-section h1 {
+            font-size: 2.4rem;
+        }
+        .hero-section p {
+            font-size: 1rem;
+        }
+        .btn-hero-google, .btn-hero-local {
+            width: 100%;
+            justify-content: center;
+        }
+        .fixture-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Contenedor de Tabs (Glassmorphism Premium) [Willys_IA] */
+    .tabs-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 0 auto 35px auto;
+        background: rgba(15, 23, 42, 0.45);
+        padding: 6px;
+        border-radius: 16px;
+        border: 1px solid var(--border-glass);
+        width: fit-content;
+        box-shadow: var(--shadow-premium);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        animation: fade-up 0.5s ease-out;
+    }
+
+    .tab-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        padding: 10px 24px;
+        border-radius: 12px;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .tab-btn:hover {
+        color: var(--text-main);
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .tab-btn.active {
+        color: white;
+        background: linear-gradient(135deg, var(--primary) 0%, hsl(142, 75%, 35%) 100%);
+        box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+
+    /* Ocultación limpia y controlada para filtros tabulares */
+    .hidden {
+        display: none !important;
+    }
+
+    /* Estilos de Tabla de Fixture Premium [Willys_IA] */
+    .responsive-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0 auto;
+        background: var(--bg-card);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-premium);
+        animation: fade-up 0.7s ease-out;
+    }
+
+    .responsive-table thead {
+        background: linear-gradient(180deg, hsla(223, 20%, 18%, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+        border-bottom: 1px solid var(--border-glass);
+    }
+
+    .responsive-table th {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: var(--text-main);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 18px 12px;
+        text-align: left;
+    }
+
+    .responsive-table td {
+        padding: 16px 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        font-size: 0.9rem;
+        color: var(--text-main);
+        vertical-align: middle;
+    }
+
+    .responsive-table tr.public-match-row:hover {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Formatos de Celdas Específicos */
+    .cell-code {
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    .cell-date, .cell-time {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+    }
+
+    .cell-time {
+        color: var(--secondary);
+    }
+
+    .table-team-layout {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .table-flag {
+        width: 24px;
+        height: auto;
+        border-radius: 3px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .table-team-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .score-num {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: var(--text-main);
+        background: rgba(15, 23, 42, 0.5);
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: 1px solid var(--border-glass);
+        display: inline-block;
+        min-width: 28px;
+    }
+
+    .text-center {
+        text-align: center !important;
+    }
+
+    .cell-result {
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .cell-venue {
+        max-width: 160px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    /* Badges y Botones */
+    .match-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        display: inline-block;
+    }
+
+    .match-badge.abierto {
+        background: var(--primary-glow);
+        color: var(--primary);
+        border: 1px solid var(--primary);
+    }
+
+    .match-badge.programado {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-muted);
+        border: 1px solid var(--border-glass);
+    }
+
+    .match-badge.liquidado {
+        background: var(--secondary-glow);
+        color: var(--secondary);
+        border: 1px solid var(--secondary);
+    }
+
+    .btn-table-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-decoration: none;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        border: 1px solid transparent;
+    }
+
+    .btn-table-action.play {
+        background: linear-gradient(135deg, var(--primary) 0%, hsl(142, 75%, 35%) 100%);
+        color: white;
+        box-shadow: 0 4px 10px var(--primary-glow);
+    }
+
+    .btn-table-action.play:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px hsla(142, 69%, 45%, 0.35);
+    }
+
+    .btn-table-action.closed {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-muted);
+        border-color: var(--border-glass);
+    }
+
+    /* Cabecera de Fecha en Fila Completa */
+    .date-group-header-row td {
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.15rem;
+        color: var(--text-main);
+        padding: 16px 20px;
+        border-left: 4px solid var(--primary);
+        border-top: 1px solid rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    }
+
+    .date-group-header-row td i {
+        color: var(--primary);
+        filter: drop-shadow(0 0 4px var(--primary));
+        margin-right: 6px;
+    }
+
+    /* Badges de Grupos del Mundial [Willys_IA] */
+    .group-badge {
+        display: inline-flex;
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 3px 10px;
+        border-radius: 6px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        width: fit-content;
+        border: 1px solid transparent;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .group-badge.badge-a, .group-badge.badge-e, .group-badge.badge-i {
+        background: hsla(142, 69%, 45%, 0.15);
+        color: hsl(142, 69%, 60%);
+        border-color: hsla(142, 69%, 45%, 0.3);
+        box-shadow: 0 0 8px hsla(142, 69%, 45%, 0.15);
+    }
+
+    .group-badge.badge-b, .group-badge.badge-f, .group-badge.badge-j {
+        background: hsla(200, 100%, 50%, 0.15);
+        color: hsl(200, 100%, 65%);
+        border-color: hsla(200, 100%, 50%, 0.3);
+        box-shadow: 0 0 8px hsla(200, 100%, 50%, 0.15);
+    }
+
+    .group-badge.badge-c, .group-badge.badge-g, .group-badge.badge-k {
+        background: hsla(43, 96%, 56%, 0.15);
+        color: hsl(43, 96%, 65%);
+        border-color: hsla(43, 96%, 56%, 0.3);
+        box-shadow: 0 0 8px hsla(43, 96%, 56%, 0.15);
+    }
+
+    .group-badge.badge-d, .group-badge.badge-h, .group-badge.badge-l {
+        background: hsla(280, 80%, 60%, 0.15);
+        color: hsl(280, 80%, 75%);
+        border-color: hsla(280, 80%, 60%, 0.3);
+        box-shadow: 0 0 8px hsla(280, 80%, 60%, 0.15);
+    }
+
+    /* ========================================================
+       MEDIA QUERY: TRANSFORMACION DE TABLA A TARJETAS EN MÓVIL
+       ======================================================== */
+    @media (max-width: 992px) {
+        .responsive-table {
+            border: none;
+            background: transparent;
+            box-shadow: none;
+            border-radius: 0;
+            overflow: visible;
+            display: block;
+        }
+
+        .responsive-table thead {
+            display: none; /* Oculta cabecera en movil */
+        }
+
+        .responsive-table tbody {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+
+        /* Cada fila se convierte en una tarjeta independiente */
+        .responsive-table tr.public-match-row {
+            display: block;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 12px 6px;
+            box-shadow: var(--shadow-premium);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+            width: 100%;
+        }
+
+        .responsive-table tr.public-match-row:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px var(--primary-glow);
+        }
+
+        .responsive-table tr.public-match-row::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            opacity: 0.7;
+        }
+
+        /* Cada celda se comporta como fila flexbox */
+        .responsive-table tr.public-match-row td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.9rem;
+            text-align: right;
+            width: 100%;
+        }
+
+        .responsive-table tr.public-match-row td:last-child {
+            border-bottom: none;
+        }
+
+        /* Inyectar la cabecera correspondiente por CSS */
+        .responsive-table tr.public-match-row td::before {
+            content: attr(data-label);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            text-align: left;
+            margin-right: 15px;
+        }
+
+        /* Ajustes de celdas especificas en movil */
+        .cell-venue {
+            max-width: 100%;
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+        }
+
+        .table-team-layout {
+            width: 100%;
+            justify-content: flex-end;
+        }
+
+        /* Fila de Cabecera de Fecha en Móvil */
+        .responsive-table tr.date-group-header-row {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+            margin-bottom: -10px;
+        }
+
+        .responsive-table tr.date-group-header-row td {
+            display: block;
+            width: 100%;
+            border-radius: 10px;
+            border-right: 1px solid rgba(255, 255, 255, 0.02);
+            border-left: 4px solid var(--primary);
+        }
+    }
+
+    /* Panel de Grupos del Usuario [Willys_IA] */
+    .user-groups-panel {
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 35px;
+        box-shadow: var(--shadow-premium);
+        animation: fade-up 0.5s ease-out;
+    }
+
+    .user-groups-panel .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    /* Botones de Cabecera Premium [Willys_IA] */
+    .btn-action-mini-header {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--primary-glow);
+        border: 1px solid var(--primary);
+        color: var(--primary);
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: var(--transition-smooth);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .btn-action-mini-header:hover {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 0 10px var(--primary-glow);
+        transform: translateY(-1px);
+    }
+
+    .btn-action-mini-header.secondary-btn {
+        background: var(--secondary-glow);
+        border: 1px solid var(--secondary);
+        color: var(--secondary);
+    }
+
+    .btn-action-mini-header.secondary-btn:hover {
+        background: var(--secondary);
+        color: var(--bg-dark);
+        box-shadow: 0 0 10px var(--secondary-glow);
+    }
+
+    .user-groups-panel .panel-header h3 {
+        font-size: 1.35rem;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-groups-panel .panel-header h3 i {
+        color: var(--primary);
+        filter: drop-shadow(0 0 5px var(--primary));
+    }
+
+    .user-groups-panel .panel-header .badge-count {
+        background: var(--primary-glow);
+        color: var(--primary);
+        border: 1px solid var(--primary);
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .groups-horizontal-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+
+    .group-card-mini {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-glass);
+        border-radius: 14px;
+        padding: 18px;
+        transition: var(--transition-smooth);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .group-card-mini:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: var(--primary);
+        box-shadow: 0 5px 15px var(--primary-glow);
+        transform: translateY(-2px);
+    }
+
+    .group-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .group-card-header .group-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .group-card-header .group-balance {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--secondary);
+        background: var(--secondary-glow);
+        border: 1px solid var(--secondary);
+        padding: 3px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .group-info-text {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .invitation-code-copy {
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--accent);
+        transition: var(--transition-smooth);
+        margin-left: 4px;
+    }
+
+    .invitation-code-copy:hover {
+        color: #fff;
+        text-shadow: 0 0 8px var(--accent);
+    }
+
+    .invitation-code-copy code {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: 1px solid var(--border-glass);
+    }
+
+    .group-card-actions {
+        margin-top: 5px;
+    }
+
+    .btn-group-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-glass);
+        color: var(--text-main);
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition-smooth);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .btn-group-action:hover {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+        box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .no-groups-placeholder {
+        text-align: center;
+        padding: 20px;
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# Determinar dinámicamente un partido de referencia abierto para la creación/adhesión express de grupos [Willys_IA] #}
+{% set primer_abierto = partidos | selectattr('estado', 'equalto', 'Abierto') | first %}
+{% if primer_abierto %}
+    {% set default_partido_id = primer_abierto.id %}
+{% else %}
+    {% set default_partido_id = partidos[0].id if partidos else 1 %}
+{% endif %}
+
+<!-- INDICADOR PRECISO DE VISTA Y FORMULARIO [Willys_IA] -->
+<div class="view-indicator-badge">
+    <i class="fa-solid fa-circle-info"></i> VISTA: Fixture Principal de Partidos | Cartelera Pública
+</div>
+
+<!-- CONTENEDOR HERO BIENVENIDA (WOW INTRO) -->
+<div class="hero-section">
+    <h1>Score<span>Tracker</span></h1>
+    <h2 class="outfit-font" style="color: var(--text-main); font-size: 1.8rem; font-weight: 500; margin-bottom: 12px;">
+        Juego Predictivo Colaborativo - Mundial 2026
+    </h2>
+    <p>Organiza grupos cerrados de amigos, concilia aportes en Balones y calcula ganadores de forma 100% transparente y automática. ¡Que ruede el balón!</p>
+    
+    <div class="hero-buttons">
+        {% if current_user.is_authenticated %}
+            <span class="outfit-font" style="color: var(--primary); font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-circle-check"></i> Sesión Activa: {{ current_user.nombre }} ({{ current_user.email }})
+            </span>
+        {% else %}
+            <a href="{{ url_for('main.login_google_mock') }}" class="btn-hero-google">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" style="width: 20px; height: 20px;">
+                Unirse con Google (1-Clic)
+            </a>
+            <a href="{{ url_for('main.registro') }}" class="btn-hero-local">
+                Registrar Cuenta Local <i class="fa-solid fa-user-plus"></i>
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{# El panel de grupos superior se elimina a solicitud para unificar toda la interacción en las filas del Fixture #}
+
+<!-- SECCION DEL FIXTURE DE PARTIDOS PÚBLICO -->
+<div class="fixture-section-header">
+    <h2><i class="fa-solid fa-calendar-days"></i> Fixture Oficial de Partidos</h2>
+    <span class="outfit-font" style="color: var(--secondary); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.05em;">
+        PRÓXIMOS ENCUENTROS
+    </span>
+</div>
+
+<!-- TABS DE FILTRADO (AMISTOSOS Y MUNDIAL 2026) [Willys_IA] -->
+<div class="tabs-container">
+    <button class="tab-btn active" id="tab-mundial" onclick="switchTab('mundial')">
+        <i class="fa-solid fa-trophy" style="color: var(--secondary);"></i> Mundial 2026
+    </button>
+    <button class="tab-btn" id="tab-amistosos" onclick="switchTab('amistosos')">
+        <i class="fa-solid fa-handshake" style="color: var(--accent);"></i> Amistosos
+    </button>
+</div>
+
+<!-- TABLA DE FIXTURE PÚBLICA RESPONSIVA [Willys_IA] -->
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Código Juego</th>
+            <th class="text-center">Hora</th>
+            <th class="text-center">Grupo / Fase</th>
+            <th>Equipo Local</th>
+            <th class="text-center">Marcador</th>
+            <th>Equipo Visitante</th>
+            <th>Lugar</th>
+            <th class="text-center">Estado</th>
+            <th class="text-center">Acción</th>
+        </tr>
+    </thead>
+    <tbody class="fixture-table-body">
+        {% if partidos %}
+            {% set vars = namespace(last_date='') %}
+            {% for partido in partidos %}
+                {% set current_date = partido.fecha_hora.strftime('%Y-%m-%d') %}
+                {% if current_date != vars.last_date %}
+                    {% set vars.last_date = current_date %}
+                    <!-- Cabecera de Fecha Cronológica [Willys_IA] -->
+                    <tr class="date-group-header-row" data-fase="{{ partido.fase or '' }}">
+                        <td colspan="9">
+                            <i class="fa-solid fa-calendar-day"></i> {{ format_fecha_es(partido.fecha_hora) }}
+                        </td>
+                    </tr>
+                {% endif %}
+                
+                <!-- Calcular Grupo Letra e ID de Juego [Willys_IA] -->
+                {% set es_amistoso = 'amistoso' in (partido.fase or '').lower() or 'preparacion' in (partido.fase or '').lower() %}
+                {% set grupo_letra = '' %}
+                {% if 'Grupo' in partido.fase %}
+                    {% set grupo_letra = partido.fase.split('Grupo')[-1].split('-')[0].strip() %}
+                {% endif %}
+                
+                {% set cod_juego = '' %}
+                {% if es_amistoso %}
+                    {% set cod_juego = 'AMIS-' ~ (partido.codigo_local or 'xx')|upper ~ '-' ~ (partido.codigo_visitante or 'xx')|upper %}
+                {% elif grupo_letra %}
+                    {% set cod_juego = 'MUND-G' ~ grupo_letra|upper ~ '-' ~ (partido.codigo_local or 'xx')|upper ~ '-' ~ (partido.codigo_visitante or 'xx')|upper %}
+                {% else %}
+                    {% set cod_juego = 'MUND-KO-' ~ (partido.codigo_local or 'xx')|upper ~ '-' ~ (partido.codigo_visitante or 'xx')|upper ~ '-' ~ partido.id %}
+                {% endif %}
+
+                <tr class="public-match-row" data-fase="{{ partido.fase or '' }}">
+                    <td class="cell-code" data-label="Código Juego">
+                        {{ cod_juego }}
+                    </td>
+                    <td class="cell-time text-center" data-label="Hora">
+                        <i class="fa-solid fa-clock" style="margin-right: 4px;"></i> {{ partido.fecha_hora.strftime('%H:%M') }} UTC
+                    </td>
+                    <td class="text-center" data-label="Grupo / Fase">
+                        {% if grupo_letra %}
+                            <span class="group-badge badge-{{ grupo_letra.lower() }}">GRUPO {{ grupo_letra }}</span>
+                        {% else %}
+                            <span class="group-badge badge-d" style="background: hsla(280, 80%, 60%, 0.15); color: hsl(280, 80%, 75%); border-color: hsla(280, 80%, 60%, 0.3);">
+                                {{ (partido.fase or 'Fase Final') }}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Equipo Local">
+                        <div class="table-team-layout">
+                            {{ render_jersey(partido.equipo_local) | safe }}
+                            {% if partido.codigo_local == 'xx' %}
+                                <i class="fa-solid fa-soccer-ball fa-spin" style="font-size: 1.4rem; color: var(--secondary); filter: drop-shadow(0 0 4px var(--secondary)); animation-duration: 6s; margin: 0 4px;"></i>
+                            {% else %}
+                                <img class="table-flag" src="https://flagcdn.com/w80/{{ partido.codigo_local }}.png" alt="Bandera {{ partido.equipo_local }}">
+                            {% endif %}
+                            <span class="table-team-name">{{ partido.equipo_local }}</span>
+                        </div>
+                    </td>
+                    <td class="text-center" data-label="Marcador">
+                        {% if partido.marcador %}
+                            {% set scores = partido.marcador.split('-') %}
+                            <span class="score-num">{{ scores[0] }}</span>
+                            <span style="font-weight: 800; color: var(--border-glass); margin: 0 4px;">:</span>
+                            <span class="score-num">{{ scores[1] }}</span>
+                        {% else %}
+                            <span class="cell-result" style="color: var(--text-muted); font-weight: 800;">VS</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Equipo Visitante">
+                        <div class="table-team-layout">
+                            {{ render_jersey(partido.equipo_visitante) | safe }}
+                            {% if partido.codigo_visitante == 'xx' %}
+                                <i class="fa-solid fa-soccer-ball fa-spin" style="font-size: 1.4rem; color: var(--secondary); filter: drop-shadow(0 0 4px var(--secondary)); animation-duration: 6s; margin: 0 4px;"></i>
+                            {% else %}
+                                <img class="table-flag" src="https://flagcdn.com/w80/{{ partido.codigo_visitante }}.png" alt="Bandera {{ partido.equipo_visitante }}">
+                            {% endif %}
+                            <span class="table-team-name">{{ partido.equipo_visitante }}</span>
+                        </div>
+                    </td>
+                    <td class="cell-venue" data-label="Lugar" title="{{ partido.lugar or 'Sede oficial por confirmar' }}">
+                        {{ partido.lugar or 'Sede por confirmar' }}
+                    </td>
+                    <td class="text-center" data-label="Estado">
+                        <span class="match-badge {{ partido.estado.lower() }}">
+                            {% if partido.estado == 'Abierto' %}
+                                Juego Abierto
+                            {% else %}
+                                {{ partido.estado }}
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td class="text-center" data-label="Acción">
+                        {% if current_user.is_authenticated %}
+                            <div style="display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%;">
+                                <!-- 1. Grupos en los que YA participa en este partido -->
+                                {% if predicciones_usuario and partido.id in predicciones_usuario %}
+                                    <div style="display: flex; flex-direction: column; gap: 6px; align-items: center; width: 100%;">
+                                        {% for pred in predicciones_usuario[partido.id] %}
+                                            <a href="{{ url_for('main.ver_partido', grupo_id=pred.grupo_id, partido_id=partido.id) }}" class="btn-table-action play" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; padding: 6px 12px; width: 100%; justify-content: center;" title="Abrir Planilla Unificada en {{ pred.grupo_nombre }}">
+                                                <i class="fa-solid fa-people-group"></i> {{ pred.grupo_nombre }}
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <!-- Enlaces pequeños para crear/unirse a otro grupo para este partido -->
+                                    <div style="display: flex; gap: 10px; font-size: 0.75rem; margin-top: 2px;">
+                                        <a href="{{ url_for('main.jugar_crear', partido_id=partido.id) }}" style="color: var(--primary); text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;" title="Crear otro grupo para este partido">
+                                            <i class="fa-solid fa-plus"></i> Crear otro
+                                        </a>
+                                        <a href="{{ url_for('main.jugar_existente', partido_id=partido.id) }}" style="color: var(--secondary); text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;" title="Unirse a otro grupo para este partido">
+                                            <i class="fa-solid fa-key"></i> Unirse a otro
+                                        </a>
+                                    </div>
+                                {% else %}
+                                    <!-- 2. Si no participa aún y el partido está abierto, mostramos los dos botones de acción directa -->
+                                    {% if partido.estado == 'Abierto' %}
+                                        <a href="{{ url_for('main.jugar_crear', partido_id=partido.id) }}" class="btn-table-action play" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; padding: 6px 12px; width: 100%; justify-content: center;" title="Crear nuevo grupo para este partido">
+                                            <i class="fa-solid fa-plus"></i> Crear Grupo
+                                        </a>
+                                        <a href="{{ url_for('main.jugar_existente', partido_id=partido.id) }}" class="btn-table-action closed" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; padding: 6px 12px; width: 100%; justify-content: center; border-color: var(--secondary); color: var(--secondary); background: rgba(253, 186, 116, 0.05);" title="Unirse a grupo existente para este partido">
+                                            <i class="fa-solid fa-key"></i> Unirse a Grupo
+                                        </a>
+                                    {% else %}
+                                        <span class="btn-table-action closed">
+                                            Cerrado <i class="fa-solid fa-circle-minus" style="color: var(--text-muted);"></i>
+                                        </span>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <!-- Usuario no autenticado -->
+                            {% if partido.estado == 'Abierto' %}
+                                <a href="{{ url_for('main.login', next=url_for('main.jugar_flujo', partido_id=partido.id)) }}" class="btn-table-action play" title="Inicia sesión para predecir">
+                                    Jugar <i class="fa-solid fa-lock"></i>
+                                </a>
+                            {% else %}
+                                <span class="btn-table-action closed">
+                                    Cerrado <i class="fa-solid fa-circle-minus" style="color: var(--text-muted);"></i>
+                                </span>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="9" class="text-center" style="padding: 40px; color: var(--text-muted);">
+                    <i class="fa-solid fa-soccer-ball" style="font-size: 3rem; color: var(--border-glass); margin-bottom: 15px;"></i>
+                    <p>No existen partidos de prueba cargados en el fixture local.</p>
+                </td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    /**
+     * Alterna la visualización del fixture entre el Mundial 2026 y partidos amistosos, agrupados por fechas de forma inteligente. [Willys_IA]
+     */
+    function switchTab(tipo) {
+        // Actualizar clase activa de los botones de pestañas
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        if (tipo === 'mundial') {
+            document.getElementById('tab-mundial').classList.add('active');
+        } else {
+            document.getElementById('tab-amistosos').classList.add('active');
+        }
+
+        // Obtener todos los elementos de la tabla en orden de aparición para el algoritmo lineal
+        const tableBody = document.querySelector('.fixture-table-body');
+        if (!tableBody) return;
+
+        const rows = tableBody.querySelectorAll('.public-match-row, .date-group-header-row');
+        
+        let totalPartidosVisibles = 0;
+        let lastHeader = null;
+        let visibleInGroup = 0;
+
+        rows.forEach(row => {
+            if (row.classList.contains('date-group-header-row')) {
+                // Si encontramos una cabecera nueva, primero decidimos el estado de la cabecera anterior
+                if (lastHeader) {
+                    if (visibleInGroup > 0) {
+                        lastHeader.classList.remove('hidden');
+                    } else {
+                        lastHeader.classList.add('hidden');
+                    }
+                }
+                // Actualizamos referencias para el nuevo grupo
+                lastHeader = row;
+                visibleInGroup = 0;
+            } else if (row.classList.contains('public-match-row')) {
+                const faseText = (row.dataset.fase || '').toLowerCase();
+                const isAmistoso = faseText.includes('amistoso') || faseText.includes('preparacion');
+                
+                const matchesFilter = (tipo === 'mundial' && !isAmistoso) || (tipo === 'amistosos' && isAmistoso);
+                
+                if (matchesFilter) {
+                    row.classList.remove('hidden');
+                    visibleInGroup++;
+                    totalPartidosVisibles++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            }
+        });
+
+        // Procesar la última cabecera procesada al final del bucle
+        if (lastHeader) {
+            if (visibleInGroup > 0) {
+                lastHeader.classList.remove('hidden');
+            } else {
+                lastHeader.classList.add('hidden');
+            }
+        }
+
+        // Manejar visualización de mensaje cuando no hay partidos visibles
+        let noMatchMsg = document.getElementById('no-matches-msg-row');
+        if (totalPartidosVisibles === 0) {
+            if (!noMatchMsg) {
+                noMatchMsg = document.createElement('tr');
+                noMatchMsg.id = 'no-matches-msg-row';
+                noMatchMsg.innerHTML = `
+                    <td colspan="9" class="text-center" style="padding: 50px 20px; color: var(--text-muted);">
+                        <i class="fa-solid fa-soccer-ball fa-spin" style="font-size: 3rem; color: var(--border-glass); margin-bottom: 20px; animation-duration: 4s;"></i>
+                        <p class="outfit-font" style="font-size: 1.1rem; font-weight: 500;">No existen partidos disponibles en esta pestaña.</p>
+                    </td>
+                `;
+                tableBody.appendChild(noMatchMsg);
+            } else {
+                noMatchMsg.classList.remove('hidden');
+            }
+        } else if (noMatchMsg) {
+            noMatchMsg.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Copia quirúrgicamente únicamente el link de invitación al portapapeles. [Willys_IA]
+     */
+    function copiarEnlaceInvitacion(codigo) {
+        const host = window.location.origin;
+        const inviteLink = `${host}/invitacion/${codigo}`;
+        
+        navigator.clipboard.writeText(inviteLink).then(() => {
+            alert(`¡Enlace express copiado con éxito!\n\nListo para compartir:\n${inviteLink}`);
+        }).catch(err => {
+            console.error("Error al copiar enlace:", err);
+            const tempInput = document.createElement("input");
+            tempInput.value = inviteLink;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            alert(`¡Enlace express copiado con éxito!\n\nListo para compartir:\n${inviteLink}`);
+        });
+    }
+
+    // Inicializar visualización por defecto al cargar el DOM
+    document.addEventListener('DOMContentLoaded', () => {
+        switchTab('mundial');
+    });
+</script>
+{% endblock %}

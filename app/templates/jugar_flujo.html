@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+
+{% block title %}Jugar Partido - {{ partido.equipo_local }} vs {{ partido.equipo_visitante }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .view-indicator-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-glass);
+        color: var(--text-muted);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 6px 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    /* Contenedor Principal del Flujo */
+    .wizard-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        border-radius: 24px;
+        padding: 35px;
+        box-shadow: var(--shadow-premium);
+        position: relative;
+        overflow: hidden;
+        animation: fade-up 0.5s ease-out;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .wizard-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--accent), var(--primary), var(--secondary));
+        opacity: 0.8;
+    }
+
+    /* Barra de Progreso del Stepper */
+    .stepper-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 35px;
+    }
+
+    .step-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text-muted);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: var(--transition-smooth);
+    }
+
+    .step-item.active {
+        color: var(--text-main);
+    }
+
+    .step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-glass);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        transition: var(--transition-smooth);
+    }
+
+    .step-item.active .step-number {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .step-divider {
+        height: 2px;
+        width: 60px;
+        background: var(--border-glass);
+        border-radius: 1px;
+    }
+
+    /* Fila del Partido */
+    .match-banner {
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .match-banner-fase {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-bottom: 12px;
+        font-weight: 700;
+    }
+
+    .match-banner-teams {
+        display: grid;
+        grid-template-columns: 2fr 1fr 2fr;
+        align-items: center;
+        width: 100%;
+        max-width: 600px;
+        gap: 15px;
+    }
+
+    .match-banner-team {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .match-banner-team img {
+        width: 48px;
+        height: auto;
+        border-radius: 6px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .match-banner-team span {
+        font-size: 1.1rem;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .match-banner-vs {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--border-glass);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .match-banner-info {
+        margin-top: 15px;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* Grid de Opciones de Juego (Binario) */
+    .options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        margin-top: 10px;
+        margin-bottom: 30px;
+    }
+
+    .option-link {
+        text-decoration: none;
+        display: flex;
+        height: 100%;
+    }
+
+    .option-card {
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .option-card:hover {
+        border-color: var(--primary);
+        background: rgba(15, 23, 42, 0.6);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px var(--primary-glow);
+    }
+
+    .option-card.accent:hover {
+        border-color: var(--secondary);
+        box-shadow: 0 8px 25px var(--secondary-glow);
+    }
+
+    .option-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-glass);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        font-size: 2rem;
+        transition: var(--transition-smooth);
+    }
+
+    .option-card:hover .option-icon {
+        color: white;
+        background: var(--primary);
+        filter: drop-shadow(0 0 8px var(--primary));
+    }
+
+    .option-card.accent:hover .option-icon {
+        color: var(--bg-dark);
+        background: var(--secondary);
+        filter: drop-shadow(0 0 8px var(--secondary));
+    }
+
+    .option-card h4 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: white;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .option-card p {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .btn-back-fixture {
+        background: transparent;
+        border: 1px solid var(--border-glass);
+        color: var(--text-muted);
+        padding: 14px 30px;
+        border-radius: 10px;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-back-fixture:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        border-color: var(--text-muted);
+    }
+
+    @keyframes fade-up {
+        0% {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .options-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- INDICADOR PRECISO DE VISTA Y FORMULARIO [Willys_IA] -->
+<div class="view-indicator-badge">
+    <i class="fa-solid fa-gamepad"></i> VISTA: Selector de Modo de Juego | Asistente de Flujo Guiado
+</div>
+
+<!-- ENCABEZADO DEL PARTIDO -->
+<div class="match-banner">
+    <span class="match-banner-fase">{{ partido.fase }}</span>
+    
+    <div class="match-banner-teams">
+        <!-- Local -->
+        <div class="match-banner-team">
+            {{ render_jersey(partido.equipo_local, size=52) | safe }}
+            {% if partido.codigo_local == 'xx' %}
+                <i class="fa-solid fa-soccer-ball fa-spin" style="font-size: 2.5rem; color: var(--secondary); filter: drop-shadow(0 0 6px var(--secondary));"></i>
+            {% else %}
+                <img src="https://flagcdn.com/w80/{{ partido.codigo_local }}.png" alt="Bandera {{ partido.equipo_local }}">
+            {% endif %}
+            <span>{{ partido.equipo_local }}</span>
+        </div>
+        
+        <!-- VS -->
+        <div class="match-banner-vs">VS</div>
+        
+        <!-- Visitante -->
+        <div class="match-banner-team">
+            {{ render_jersey(partido.equipo_visitante, size=52) | safe }}
+            {% if partido.codigo_visitante == 'xx' %}
+                <i class="fa-solid fa-soccer-ball fa-spin" style="font-size: 2.5rem; color: var(--secondary); filter: drop-shadow(0 0 6px var(--secondary));"></i>
+            {% else %}
+                <img src="https://flagcdn.com/w80/{{ partido.codigo_visitante }}.png" alt="Bandera {{ partido.equipo_visitante }}">
+            {% endif %}
+            <span>{{ partido.equipo_visitante }}</span>
+        </div>
+    </div>
+    
+    <div class="match-banner-info">
+        <span><i class="fa-solid fa-calendar-day" style="color: var(--primary);"></i> {{ format_fecha_es(partido.fecha_hora) }}</span>
+        <span><i class="fa-solid fa-clock" style="color: var(--secondary);"></i> {{ partido.fecha_hora.strftime('%H:%M') }} UTC</span>
+        <span><i class="fa-solid fa-location-dot" style="color: var(--accent);"></i> {{ partido.lugar }}</span>
+    </div>
+</div>
+
+<div class="wizard-card">
+    <!-- STEPPER HEADER -->
+    <div class="stepper-header">
+        <div class="step-item active">
+            <span class="step-number">1</span>
+            <span>Elegir Modo</span>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step-item">
+            <span class="step-number">2</span>
+            <span>Completar</span>
+        </div>
+    </div>
+
+    <h3 style="text-align: center; margin-bottom: 25px; font-size: 1.5rem; font-family: 'Outfit';">¿Qué deseas hacer hoy?</h3>
+    
+    <div class="options-grid">
+        <!-- Opción 1: Jugar en Grupo Existente -->
+        <a href="{{ url_for('main.jugar_existente', partido_id=partido.id) }}" class="option-link">
+            <div class="option-card">
+                <div class="option-icon" style="color: var(--primary);">
+                    <i class="fa-solid fa-users-rectangle"></i>
+                </div>
+                <h4>Opción 1: Jugar en Grupo Existente</h4>
+                <p>Ingresa tu pronóstico en uno de tus grupos activos, o únete a un nuevo grupo cerrado usando un código de invitación.</p>
+                <span class="outfit-font" style="color: var(--primary); font-weight: 700; font-size: 0.9rem;">ELEGIR MODO <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+        </a>
+
+        <!-- Opción 2: Crear un Nuevo Grupo -->
+        <a href="{{ url_for('main.jugar_crear', partido_id=partido.id) }}" class="option-link">
+            <div class="option-card accent">
+                <div class="option-icon" style="color: var(--secondary);">
+                    <i class="fa-solid fa-folder-plus"></i>
+                </div>
+                <h4>Opción 2: Crear un Nuevo Grupo</h4>
+                <p>Funda una nueva comunidad cerrada de amigos, establece tus propias reglas y realiza tu predicción de una vez.</p>
+                <span class="outfit-font" style="color: var(--secondary); font-weight: 700; font-size: 0.9rem;">ELEGIR MODO <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Botón Volver -->
+    <a href="{{ url_for('main.index') }}" class="btn-back-fixture">
+        <i class="fa-solid fa-circle-chevron-left"></i> Volver al Fixture
+    </a>
+</div>
+
+{% endblock %}

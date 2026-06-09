@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .view-indicator-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-glass);
+        color: var(--text-muted);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 6px 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    /* Estructura del Dashboard */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        animation: fade-up 0.5s ease-out;
+    }
+
+    /* Tarjetas del Dashboard */
+    .dashboard-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: var(--shadow-premium);
+        margin-bottom: 30px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        border-bottom: 1px solid var(--border-glass);
+        padding-bottom: 15px;
+    }
+
+    .card-header h3 {
+        font-size: 1.5rem;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-header h3 i {
+        color: var(--primary);
+    }
+
+    /* Lista de Grupos */
+    .group-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .group-item {
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid var(--border-glass);
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: var(--transition-smooth);
+        text-decoration: none;
+        color: var(--text-main);
+    }
+
+    .group-item:hover {
+        border-color: var(--primary);
+        background: rgba(15, 23, 42, 0.6);
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .group-info h4 {
+        font-size: 1.2rem;
+        margin-bottom: 4px;
+    }
+
+    .group-info p {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .group-metrics {
+        text-align: right;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .metric-balance {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .metric-balance.positive {
+        color: var(--primary);
+    }
+
+    .metric-balance.negative {
+        color: var(--danger);
+    }
+
+    .metric-balance.zero {
+        color: var(--text-muted);
+    }
+
+    .btn-view {
+        background: var(--border-glass);
+        border: 1px solid var(--border-glass);
+        color: var(--text-main);
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: var(--transition-smooth);
+    }
+
+    .group-item:hover .btn-view {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    /* Formularios laterales (Crear y Unirse) */
+    .sidebar-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow-premium);
+        margin-bottom: 30px;
+    }
+
+    .sidebar-card h4 {
+        font-size: 1.25rem;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-main);
+        border-bottom: 1px solid var(--border-glass);
+        padding-bottom: 10px;
+    }
+
+    .sidebar-card h4 i {
+        color: var(--secondary);
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .form-control {
+        width: 100%;
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid var(--border-glass);
+        color: var(--text-main);
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: var(--transition-smooth);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--secondary);
+        box-shadow: 0 0 10px var(--secondary-glow);
+    }
+
+    .btn-action {
+        width: 100%;
+        border: none;
+        color: var(--text-dark);
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .btn-action.secondary {
+        background: var(--secondary);
+        box-shadow: 0 4px 15px var(--secondary-glow);
+    }
+
+    .btn-action.secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px hsla(43, 96%, 56%, 0.3);
+    }
+
+    .btn-action.primary {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .btn-action.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px hsla(142, 69%, 45%, 0.3);
+    }
+
+    .no-groups {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-muted);
+    }
+
+    .no-groups i {
+        font-size: 3rem;
+        color: var(--border-glass);
+        margin-bottom: 15px;
+    }
+
+    /* Responsive Ajustes */
+    @media (max-width: 992px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- INDICADOR PRECISO DE VISTA Y FORMULARIO [Willys_IA] -->
+<div class="view-indicator-badge">
+    <i class="fa-solid fa-gauge"></i> VISTA: Panel de Control (Dashboard) | FORMULARIO: Unirse o Crear Nueva Comunidad
+</div>
+
+<div class="dashboard-grid">
+    
+    <!-- PANEL IZQUIERDO: Mis Grupos Predictivos -->
+    <div>
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-trophy"></i> Mis Grupos de Juego</h3>
+                <span class="outfit-font" style="color: var(--primary); font-weight: 600; font-size: 0.9rem;">
+                    MUNDIAL FIFA 2026
+                </span>
+            </div>
+            
+            <div class="group-list">
+                {% if mis_grupos %}
+                    {% for membresia in mis_grupos %}
+                        {% set grupo = membresia.grupo %}
+                        <a href="{{ url_for('main.ver_grupo', grupo_id=grupo.id) }}" class="group-item">
+                            <div class="group-info">
+                                <h4>{{ grupo.nombre }}</h4>
+                                <p>
+                                    <i class="fa-solid fa-gamepad" style="margin-right: 4px;"></i> {{ grupo.tipo_juego }} 
+                                    | <i class="fa-solid fa-coins" style="margin-right: 4px; margin-left: 10px;"></i> 1 Balón = {{ grupo.balon_equivalencia }} {{ grupo.moneda_codigo }}
+                                </p>
+                            </div>
+                            <div class="group-metrics">
+                                <div class="metric-balance {% if membresia.balance_balones > 0 %}positive{% elif membresia.balance_balones < 0 %}negative{% else %}zero{% endif %}">
+                                    {% if membresia.balance_balones > 0 %}+{% endif %}{{ membresia.balance_balones }} ⚽
+                                </div>
+                                <span class="btn-view">Jugar <i class="fa-solid fa-chevron-right"></i></span>
+                            </div>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-groups" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px;">
+                        <i class="fa-solid fa-people-group" style="font-size: 3.5rem; color: var(--border-glass); margin-bottom: 20px;"></i>
+                        <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">Aún no tienes grupos de juego activos</p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); max-width: 450px; margin: 0 auto 20px auto; line-height: 1.5;">
+                            Para empezar a pronosticar, debes **crear un grupo** (en el panel derecho) como Administrador, o **unirte a uno** usando el código de invitación provisto por tu grupo de amigos.
+                        </p>
+                        
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 500px;">
+                            <a href="{{ url_for('main.index') }}" class="btn-action primary" style="flex: 1; min-width: 200px; text-decoration: none;">
+                                <i class="fa-solid fa-calendar-days"></i> Ir al Fixture de Partidos
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- PANEL DERECHO: Unirse y Crear -->
+    <div>
+        <!-- UNIRSE A GRUPO -->
+        <div class="sidebar-card">
+            <h4><i class="fa-solid fa-user-plus"></i> Unirse a Grupo</h4>
+            <form action="{{ url_for('main.unirse_grupo') }}" method="POST">
+                <div class="form-group">
+                    <label class="form-label" for="codigo_invitacion">Código de Invitación</label>
+                    <input type="text" id="codigo_invitacion" name="codigo_invitacion" class="form-control" placeholder="Ej: A8DF67B2" required style="text-transform: uppercase;">
+                </div>
+                <button type="submit" class="btn-action secondary">
+                    Unirse a Comunidad <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </button>
+            </form>
+        </div>
+        
+        <!-- CREAR NUEVO GRUPO (CONSIDERACIONES DEL ACUERDO) -->
+        <div class="sidebar-card">
+            <h4><i class="fa-solid fa-plus-circle"></i> Crear Acuerdo de Grupo</h4>
+            <form action="{{ url_for('main.dashboard') }}" method="POST">
+                
+                <div class="form-group">
+                    <label class="form-label" for="nombre_grupo">Nombre del Grupo</label>
+                    <input type="text" id="nombre_grupo" name="nombre_grupo" class="form-control" placeholder="Ej: Amigos del Fútbol" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" class="form-control" rows="2" placeholder="Reglas del grupo de amigos..."></textarea>
+                </div>
+                
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label class="form-label" for="balones_aporte">Aporte (Balones)</label>
+                        <input type="number" id="balones_aporte" name="balones_aporte" class="form-control" value="10" min="1" required>
+                    </div>
+                    <div>
+                        <label class="form-label" for="balon_equivalencia">Valor del Balón</label>
+                        <input type="number" id="balon_equivalencia" name="balon_equivalencia" class="form-control" value="10" min="1" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="moneda_codigo">Moneda Local</label>
+                    <input type="text" id="moneda_codigo" name="moneda_codigo" class="form-control" value="Bs" placeholder="Bs, $, ARS" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="tipo_juego">Modalidad de Pronóstico</label>
+                    <select id="tipo_juego" name="tipo_juego" class="form-control">
+                        <option value="Marcador">Marcador Exacto (Ej: 2 - 1)</option>
+                        <option value="Resultado">Resultado General (1X2)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="politica_pozo">Si Nadie Acierta (Pozo Vacío)</label>
+                    <select id="politica_pozo" name="politica_pozo" class="form-control">
+                        <option value="Acumular">Acumular Pozo para próximo partido</option>
+                        <option value="Devolver">Devolver aportes a participantes</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="limite_pago">Límite Pago (minutos antes)</label>
+                    <input type="number" id="limite_pago" name="limite_pago" class="form-control" value="60" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="acuerdos_especiales">Acuerdos Especiales (Texto Libre)</label>
+                    <textarea id="acuerdos_especiales" name="acuerdos_especiales" class="form-control" rows="2" placeholder="Ej: El último paga el asado..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="datos_pago">Datos Pago Tesorero</label>
+                    <textarea id="datos_pago" name="datos_pago" class="form-control" rows="2" placeholder="QR enlace, datos de transferencia bancaria..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn-action primary">
+                    Crear y Validar Grupo <i class="fa-solid fa-circle-check"></i>
+                </button>
+            </form>
+        </div>
+        
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    /**
+     * Auto-detecta y carga el código de invitación proveniente de enlaces compartidos. [Willys_IA]
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('codigo_invitacion');
+        if (code) {
+            const input = document.getElementById('codigo_invitacion');
+            if (input) {
+                input.value = code;
+                input.focus();
+                
+                // Hacer scroll suave hasta la tarjeta de unirse a grupo
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                console.log("[Willys_IA] Código de invitación auto-cargado desde URL:", code);
+            }
+        }
+    });
+</script>
+{% endblock %}

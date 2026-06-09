@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Comisiones - Admin{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Estructura del Panel de Comisiones */
+    .admin-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+        animation: fade-up 0.5s ease-out;
+    }
+
+    .premium-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: var(--shadow-premium);
+        margin-bottom: 30px;
+    }
+
+    .premium-card h3 {
+        font-size: 1.5rem;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid var(--border-glass);
+        padding-bottom: 15px;
+    }
+
+    .premium-card h3 i {
+        color: var(--secondary);
+    }
+
+    /* Tabla Contable */
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .admin-table th {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        padding: 14px 10px;
+        border-bottom: 1px solid var(--border-glass);
+    }
+
+    .admin-table td {
+        padding: 16px 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        font-size: 0.95rem;
+        vertical-align: middle;
+    }
+
+    .admin-row:hover {
+        background: rgba(255, 255, 255, 0.01);
+    }
+
+    .value-balones {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .value-money {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        color: var(--secondary);
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-badge.pendiente {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--secondary);
+        border: 1px solid var(--secondary);
+    }
+
+    .status-badge.pagado {
+        background: rgba(34, 197, 94, 0.15);
+        color: var(--primary);
+        border: 1px solid var(--primary);
+    }
+
+    .btn-collect {
+        background: var(--secondary);
+        border: none;
+        color: var(--text-dark);
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Outfit', sans-serif;
+        box-shadow: 0 4px 12px var(--secondary-glow);
+    }
+
+    .btn-collect:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px hsla(43, 96%, 56%, 0.4);
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-muted);
+    }
+
+    .no-data i {
+        font-size: 3rem;
+        color: var(--border-glass);
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-grid">
+    
+    <!-- PLANILLA DE COMISIONES PENDIENTES (DESBLOQUEO DE GRUPOS) -->
+    <div class="premium-card">
+        <h3><i class="fa-solid fa-file-invoice-dollar"></i> Conciliación de Comisiones Pendientes</h3>
+        
+        {% if pendientes %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID Reg</th>
+                        <th>Grupo de Juego</th>
+                        <th>Partido Liquidado</th>
+                        <th>Comisión (Balones)</th>
+                        <th>Monto a Recaudar</th>
+                        <th>Estado</th>
+                        <th style="text-align: right;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in pendientes %}
+                        <tr class="admin-row">
+                            <td style="font-family: monospace; font-weight: bold; color: var(--text-muted);">#{{ c.id }}</td>
+                            <td class="player-name">{{ c.grupo.nombre }}</td>
+                            <td>{{ c.partido.equipo_local }} vs {{ c.partido.equipo_visitante }}</td>
+                            <td class="value-balones">{{ c.monto_balones }} ⚽</td>
+                            <td class="value-money">{{ c.monto_dinero_real }} {{ c.grupo.moneda_codigo }}</td>
+                            <td>
+                                <span class="status-badge {{ c.estado_pago.lower() }}">
+                                    {{ c.estado_pago }}
+                                </span>
+                            </td>
+                            <td style="text-align: right;">
+                                <form action="{{ url_for('main.conciliar_comision_app', comision_id=c.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn-collect">
+                                        Confirmar Cobro Offline <i class="fa-solid fa-circle-check"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="no-data">
+                <i class="fa-solid fa-circle-check" style="color: var(--primary);"></i>
+                <p>No existen comisiones de grupos pendientes de cobro.</p>
+                <p style="font-size: 0.85rem; margin-top: 8px;">¡Todos los grupos de ScoreTracker están al día y desbloqueados!</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- HISTORIAL DE COMISIONES COBRADAS -->
+    <div class="premium-card">
+        <h3><i class="fa-solid fa-history"></i> Historial de Comisiones Recaudadas</h3>
+        
+        {% if pagadas %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID Reg</th>
+                        <th>Grupo de Juego</th>
+                        <th>Partido Liquidado</th>
+                        <th>Comisión (Balones)</th>
+                        <th>Monto Cobrado</th>
+                        <th>Fecha de Cobro</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in pagadas %}
+                        <tr class="admin-row">
+                            <td style="font-family: monospace; font-weight: bold; color: var(--text-muted);">#{{ c.id }}</td>
+                            <td class="player-name">{{ c.grupo.nombre }}</td>
+                            <td>{{ c.partido.equipo_local }} vs {{ c.partido.equipo_visitante }}</td>
+                            <td class="value-balones">{{ c.monto_balones }} ⚽</td>
+                            <td class="value-money">{{ c.monto_dinero_real }} {{ c.grupo.moneda_codigo }}</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">{{ c.fecha_liquidacion.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                <span class="status-badge {{ c.estado_pago.lower() }}">
+                                    {{ c.estado_pago }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="no-data">
+                <i class="fa-solid fa-folder-open"></i>
+                <p>Aún no se han registrado comisiones recaudadas en el historial.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+</div>
+{% endblock %}

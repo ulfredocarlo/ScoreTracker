@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+
+{% block title %}Invitación a Grupo - {{ grupo.nombre }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .view-indicator-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-glass);
+        color: var(--text-muted);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 6px 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .invite-container {
+        animation: fade-up 0.5s ease-out;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .premium-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: var(--shadow-premium);
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-card.readonly::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--secondary), hsl(43, 90%, 40%));
+        opacity: 0.8;
+    }
+
+    .premium-card.predict::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), hsl(142, 75%, 35%));
+        opacity: 0.8;
+    }
+
+    .premium-card h3 {
+        font-size: 1.5rem;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-glass);
+        padding-bottom: 10px;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    /* Rules read-only grid */
+    .rules-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 15px;
+    }
+
+    .rules-item {
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid var(--border-glass);
+        padding: 14px 18px;
+        border-radius: 10px;
+        text-align: left;
+    }
+
+    .rules-item span {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        letter-spacing: 0.05em;
+    }
+
+    .rules-item strong {
+        font-size: 1.15rem;
+        color: var(--text-main);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    /* Match Banner */
+    .match-banner {
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .match-teams {
+        display: grid;
+        grid-template-columns: 2fr 1fr 2fr;
+        align-items: center;
+        width: 100%;
+        max-width: 500px;
+        gap: 15px;
+    }
+
+    .match-team {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .match-team img {
+        width: 40px;
+        height: auto;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .match-team span {
+        font-size: 1rem;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .match-vs {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--border-glass);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    /* Goles input row */
+    .goles-input-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .input-goles {
+        width: 70px;
+        height: 60px;
+        font-size: 2.2rem;
+        font-weight: 800;
+        text-align: center;
+        font-family: 'Outfit', sans-serif;
+        border-radius: 10px;
+        background: var(--bg-dark);
+        border: 1px solid var(--border-glass);
+        color: white;
+        transition: var(--transition-smooth);
+    }
+
+    .input-goles:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 12px var(--primary-glow);
+        outline: none;
+    }
+
+    /* Forms inputs */
+    .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .form-control {
+        width: 100%;
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid var(--border-glass);
+        border-radius: 8px;
+        padding: 12px 16px;
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+        transition: var(--transition-smooth);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .checkbox-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 25px 0;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-align: left;
+    }
+
+    .checkbox-container input {
+        margin-top: 3px;
+    }
+
+    .btn-submit {
+        width: 100%;
+        background: linear-gradient(135deg, var(--primary) 0%, hsl(142, 75%, 35%) 100%);
+        border: none;
+        color: white;
+        padding: 16px;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 5px 15px var(--primary-glow);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px hsla(142, 69%, 45%, 0.4);
+    }
+
+    @keyframes fade-up {
+        0% {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="invite-container">
+    <!-- INDICADOR PRECISO DE VISTA Y FORMULARIO [Willys_IA] -->
+    <div class="view-indicator-badge" style="width: 100%;">
+        <i class="fa-solid fa-envelope-open-text"></i> VISTA: Invitación Express de Enlace | FORMULARIO: Aceptación de Reglamento y Pronóstico
+    </div>
+
+    <!-- TARJETA A: DATOS DEL GRUPO (READONLY) -->
+    <div class="premium-card readonly">
+        <h3><i class="fa-solid fa-trophy" style="color: var(--secondary);"></i> Has sido invitado a: {{ grupo.nombre }}</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px; text-align: left;">
+            {{ grupo.descripcion or "Funda una comunidad cerrada y acuerda reglamentos contables para jugar con tus amigos." }}
+        </p>
+
+        <div class="rules-grid">
+            <div class="rules-item">
+                <span>Aporte Lúdico</span>
+                <strong>{{ grupo.balones_aporte }} Balones / partido</strong>
+            </div>
+            <div class="rules-item">
+                <span>Tasa del Balón</span>
+                <strong>1 ⚽ = {{ grupo.balon_equivalencia }} {{ grupo.moneda_codigo }}</strong>
+            </div>
+            <div class="rules-item">
+                <span>Modalidad Pronóstico</span>
+                <strong>{{ grupo.tipo_juego }}</strong>
+            </div>
+            <div class="rules-item">
+                <span>Política de Empates</span>
+                <strong>{{ grupo.politica_pozo_vacio }} Pozo</strong>
+            </div>
+            <div class="rules-item" style="grid-column: span 2; border-left: 3px solid var(--secondary); background: rgba(245, 158, 11, 0.03);">
+                <span>Caja de Depósitos (Tesorero)</span>
+                <strong style="font-family: monospace; font-size: 0.95rem; color: var(--secondary); display: block; margin-bottom: 8px;">{{ grupo.datos_pago_tesorero }}</strong>
+                {% if grupo.qr_pago_path %}
+                    <div style="text-align: center; margin-top: 10px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid var(--border-glass);">
+                        <span style="font-size: 0.75rem; color: var(--secondary); font-weight: 700; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;"><i class="fa-solid fa-qrcode"></i> Código QR de Pago Oficial</span>
+                        <img src="{{ url_for('static', filename=grupo.qr_pago_path) }}" alt="QR de Pago" style="max-width: 160px; height: auto; border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.1); box-shadow: var(--shadow-premium);">
+                    </div>
+                {% endif %}
+            </div>
+            {% if grupo.acuerdos_especiales %}
+                <div class="rules-item" style="grid-column: span 2; border-left: 3px solid var(--primary); background: rgba(16, 185, 129, 0.03);">
+                    <span>Acuerdos Particulares</span>
+                    <strong style="font-style: italic; font-size: 0.9rem;">"{{ grupo.acuerdos_especiales }}"</strong>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- SI YA ES MIEMBRO, MOSTRAR AVISO -->
+    {% if membresia_existente %}
+        <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid var(--border-glass); padding: 15px 20px; border-radius: 12px; margin-bottom: 24px; text-align: left;">
+            <i class="fa-solid fa-circle-check" style="color: var(--primary); margin-right: 8px;"></i>
+            <span style="font-size: 0.9rem; color: var(--text-main);"><strong>Ya eres miembro de este grupo.</strong> Completar este formulario te permitirá registrar o actualizar tu pronóstico para el próximo partido.</span>
+        </div>
+    {% endif %}
+
+    <!-- TARJETA B: PRONÓSTICO (SI HAY PARTIDO ABIERTO) -->
+    <div class="premium-card predict">
+        <h3><i class="fa-solid fa-gamepad" style="color: var(--primary);"></i> Registrar Pronóstico e Ingresar</h3>
+        
+        {% if partido %}
+            <form action="{{ url_for('main.invitacion_flujo', codigo=grupo.codigo_invitacion, partido_id=partido.id) }}" method="POST" enctype="multipart/form-data">
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px; line-height: 1.4; text-align: left;">
+                    Para completar tu incorporación lúdica, introduce tu marcador estimado para el próximo encuentro disponible en la cartelera:
+                </p>
+
+                <!-- Match Banner -->
+                <div class="match-banner">
+                    <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 10px;">{{ partido.fase }}</span>
+                    <div class="match-teams">
+                        <!-- Local -->
+                        <div class="match-team">
+                            {{ render_jersey(partido.equipo_local, size=44) | safe }}
+                            <img src="https://flagcdn.com/w80/{{ partido.codigo_local }}.png" alt="{{ partido.equipo_local }}">
+                            <span>{{ partido.equipo_local }}</span>
+                        </div>
+                        <!-- VS -->
+                        <div class="match-vs">VS</div>
+                        <!-- Visitante -->
+                        <div class="match-team">
+                            {{ render_jersey(partido.equipo_visitante, size=44) | safe }}
+                            <img src="https://flagcdn.com/w80/{{ partido.codigo_visitante }}.png" alt="{{ partido.equipo_visitante }}">
+                            <span>{{ partido.equipo_visitante }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inputs Goles -->
+                <div class="goles-input-row">
+                    <input type="number" name="goles_local" class="input-goles" min="0" placeholder="0" required>
+                    <span style="font-size: 1.8rem; font-weight: 800; color: var(--text-muted);">:</span>
+                    <input type="number" name="goles_visitante" class="input-goles" min="0" placeholder="0" required>
+                </div>
+
+                <!-- Comprobante Aporte Offline -->
+                <div class="form-group">
+                    <label for="comprobante_pago">Referencia/Aviso de Aporte Offline (QR/Banco/Efectivo)</label>
+                    <input type="text" name="comprobante_pago" id="comprobante_pago" class="form-control" placeholder="Ej. Depósito Banco Unión, Titular: Willys, Trans: #91823" required style="margin-bottom: 12px;">
+                    
+                    <label for="comprobante_image">Cargar Imagen/Captura del Depósito (Opcional)</label>
+                    <input type="file" name="comprobante_image" id="comprobante_image" class="form-control" accept="image/*" style="padding: 8px 16px;">
+                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 5px;"><i class="fa-solid fa-circle-info"></i> Imagen optimizada automáticamente para ahorrar ancho de banda.</span>
+                </div>
+
+                <!-- Checkbox de Reglas -->
+                <label class="checkbox-container">
+                    <input type="checkbox" name="aceptar_reglas" required>
+                    <span>He leído las consideraciones contables del grupo y me comprometo a cumplir con los <strong>{{ grupo.balones_aporte }} Balones</strong> de aporte offline de mutuo acuerdo.</span>
+                </label>
+
+                <button type="submit" class="btn-submit">
+                    Aceptar Reglamento y Unirse <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </button>
+            </form>
+        {% else %}
+            <form action="{{ url_for('main.invitacion_flujo', codigo=grupo.codigo_invitacion) }}" method="POST">
+                <input type="hidden" name="goles_local" value="">
+                <input type="hidden" name="goles_visitante" value="">
+                
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px; text-align: left;">
+                    No hay partidos abiertos disponibles para pronósticos en este momento. Sin embargo, puedes proceder a incorporarte formalmente al grupo de juego aceptando las consideraciones del Tesorero.
+                </p>
+
+                <label class="checkbox-container">
+                    <input type="checkbox" name="aceptar_reglas" required>
+                    <span>Acepto incorporarme a la comunidad y declaro estar de acuerdo con las consideraciones de juego offline descritas arriba.</span>
+                </label>
+
+                <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, var(--secondary) 0%, hsl(43, 90%, 40%) 100%); color: var(--text-dark); box-shadow: 0 5px 15px var(--secondary-glow);">
+                    Aceptar Reglamento y Unirme <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

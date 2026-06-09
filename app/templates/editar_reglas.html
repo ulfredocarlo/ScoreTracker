@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Reglamento - {{ grupo.nombre }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .rules-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        border-radius: 24px;
+        padding: 35px;
+        box-shadow: var(--shadow-premium);
+        position: relative;
+        overflow: hidden;
+        animation: fade-up 0.5s ease-out;
+        margin-top: 20px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .rules-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--secondary), var(--accent));
+        opacity: 0.8;
+    }
+
+    .view-indicator-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-glass);
+        color: var(--text-muted);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 6px 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        padding-bottom: 6px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .form-control {
+        width: 100%;
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid var(--border-glass);
+        border-radius: 8px;
+        padding: 12px 16px;
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+        transition: var(--transition-smooth);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--secondary);
+        box-shadow: 0 0 10px var(--secondary-glow);
+        background: rgba(30, 41, 59, 0.8);
+    }
+
+    .form-row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .form-row-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+    }
+
+    .buttons-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .btn-submit {
+        flex: 1;
+        padding: 14px 20px;
+        border-radius: 10px;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1rem;
+        cursor: pointer;
+        border: none;
+        transition: var(--transition-smooth);
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-submit.btn-secondary {
+        background: linear-gradient(135deg, var(--secondary) 0%, hsl(43, 85%, 40%) 100%);
+        color: var(--bg-dark);
+        box-shadow: 0 5px 15px var(--secondary-glow);
+    }
+
+    .btn-submit.btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px hsla(43, 96%, 56%, 0.4);
+    }
+
+    .btn-back {
+        background: transparent;
+        border: 1px solid var(--border-glass);
+        color: var(--text-muted);
+        padding: 14px 25px;
+        border-radius: 10px;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        border-color: var(--text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rules-card">
+    <!-- INDICADOR PRECISO DE VISTA Y FORMULARIO [Willys_IA] -->
+    <div class="view-indicator-badge">
+        <i class="fa-solid fa-sliders"></i> VISTA: Administración del Grupo | FORMULARIO: Modificar Reglamento de Balones
+    </div>
+
+    <h2 class="outfit-font" style="font-weight: 800; font-size: 1.75rem; color: white; margin-bottom: 5px;">Modificar Reglamento</h2>
+    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 25px;">
+        Como administrador, puedes ajustar las consideraciones y reglas de este grupo cerrado. Los cambios se reflejarán instantáneamente en todos los partidos.
+    </p>
+
+    <!-- FORMULARIO DE REGLAMENTO [Willys_IA] -->
+    <form action="{{ url_for('main.editar_reglas', grupo_id=grupo.id, partido_id=request.args.get('partido_id')) }}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="partido_id" value="{{ request.args.get('partido_id', '') }}">
+        
+        <!-- 1. PARÁMETROS FINANCIEROS Y MONEDA -->
+        <div class="section-title">
+            <span style="color: var(--secondary); font-size: 1.1rem;">1.</span> Consideraciones de Aporte Financiero
+        </div>
+
+        <div class="form-row-3">
+            <div class="form-group">
+                <label for="balones_aporte">Aporte (Balones)</label>
+                <input type="number" name="balones_aporte" id="balones_aporte" class="form-control" value="{{ grupo.balones_aporte }}" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="balon_equivalencia">Valor de cada Balón</label>
+                <input type="number" name="balon_equivalencia" id="balon_equivalencia" class="form-control" value="{{ grupo.balon_equivalencia }}" step="0.1" min="0.1" required>
+            </div>
+            <div class="form-group">
+                <label for="moneda_codigo">Moneda Local (Código)</label>
+                <!-- Drowdown con "otra cosa" o input text simple para máxima libertad -->
+                <input type="text" name="moneda_codigo" id="moneda_codigo" class="form-control" value="{{ grupo.moneda_codigo }}" placeholder="Ej. Bs, $, ARS o escribe otra cosa" required>
+            </div>
+        </div>
+
+        <!-- 2. REGLAMENTO Y POLÍTICAS DE JUEGO -->
+        <div class="section-title" style="margin-top: 15px;">
+            <span style="color: var(--secondary); font-size: 1.1rem;">2.</span> Configuración de Apuestas y Pozo
+        </div>
+
+        <div class="form-row-2">
+            <div class="form-group">
+                <label for="tipo_juego">Modalidad de Predicción</label>
+                <select name="tipo_juego" id="tipo_juego" class="form-control">
+                    <option value="Marcador" {% if grupo.tipo_juego == 'Marcador' %}selected{% endif %}>Marcador Exacto (goles de local y visitante)</option>
+                    <option value="Resultado" {% if grupo.tipo_juego == 'Resultado' %}selected{% endif %}>Resultado General (L/E/V)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="politica_pozo">Política de Pozo Vacío</label>
+                <select name="politica_pozo" id="politica_pozo" class="form-control">
+                    <option value="Acumular" {% if grupo.politica_pozo_vacio == 'Acumular' %}selected{% endif %}>Acumular pozo para el siguiente partido</option>
+                    <option value="Devolver" {% if grupo.politica_pozo_vacio == 'Devolver' %}selected{% endif %}>Devolver aportes a los participantes</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="limite_pago">Límite para Conciliación de Pagos (Minutos antes del partido)</label>
+            <input type="number" name="limite_pago" id="limite_pago" class="form-control" value="{{ grupo.limite_pago_minutos }}" min="1" required>
+        </div>
+
+        <!-- 3. DATOS DE PAGO Y ACUERDOS ESPECIALES (ACÁ PERMITE COLOCAR "OTRA COSA" LIBREMENTE) -->
+        <div class="section-title" style="margin-top: 15px;">
+            <span style="color: var(--secondary); font-size: 1.1rem;">3.</span> Datos Contables e Instrucciones Offline
+        </div>
+
+        <div class="form-group">
+            <label for="datos_pago">Instrucciones de Pago (Cuentas, QR o escribe otra cosa)</label>
+            <textarea name="datos_pago" id="datos_pago" class="form-control" rows="3" placeholder="Ej. Cuenta Banco Unión 1234567, Titular: Willys o detalla otra forma de pago..." required>{{ grupo.datos_pago_tesorero }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="qr_image">Imagen del Código QR Bancario (Para depósitos de los jugadores)</label>
+            <input type="file" name="qr_image" id="qr_image" class="form-control" accept="image/*" style="padding: 8px 16px;">
+            {% if grupo.qr_pago_path %}
+                <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-glass); width: fit-content;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);"><i class="fa-solid fa-circle-check" style="color: var(--primary);"></i> QR Actual cargado en disco</span>
+                    <a href="{{ url_for('static', filename=grupo.qr_pago_path) }}" target="_blank" style="color: var(--secondary); font-size: 0.8rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-eye"></i> Previsualizar QR
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="acuerdos_especiales">Acuerdos Especiales de la Comunidad (Cena, Premios o escribe otra cosa)</label>
+            <textarea name="acuerdos_especiales" id="acuerdos_especiales" class="form-control" rows="2" placeholder="Ej. El participante con menos aciertos financia la cena final de clausura o escribe otra cosa...">{{ grupo.acuerdos_especiales or '' }}</textarea>
+        </div>
+
+        <!-- BOTONES DE ACCIÓN -->
+        <div class="buttons-group">
+            {% if request.args.get('partido_id') %}
+                <a href="{{ url_for('main.ver_partido', grupo_id=grupo.id, partido_id=request.args.get('partido_id')) }}" class="btn-back">
+                    <i class="fa-solid fa-arrow-left"></i> Cancelar
+                </a>
+            {% else %}
+                <a href="{{ url_for('main.ver_grupo', grupo_id=grupo.id) }}" class="btn-back">
+                    <i class="fa-solid fa-arrow-left"></i> Cancelar
+                </a>
+            {% endif %}
+            <button type="submit" class="btn-submit btn-secondary">
+                <i class="fa-solid fa-save"></i> Guardar Reglamento
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,706 @@
+{% extends "base.html" %}
+
+{% block title %}{{ grupo.nombre }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .view-indicator-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-glass);
+        color: var(--text-muted);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 6px 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    /* Estructura del Detalle del Grupo */
+    .group-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 30px;
+        animation: fade-up 0.5s ease-out;
+    }
+
+    /* Tarjetas principales */
+    .premium-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(var(--blur-strength));
+        -webkit-backdrop-filter: blur(var(--blur-strength));
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow-premium);
+        margin-bottom: 24px;
+    }
+
+    .premium-card h3 {
+        font-size: 1.35rem;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-glass);
+        padding-bottom: 10px;
+    }
+
+    .premium-card h3 i {
+        color: var(--primary);
+    }
+
+    /* Banner de Aceptacion Obligatoria (WOW alert) */
+    .rules-alert-banner {
+        background: linear-gradient(135deg, hsla(43, 96%, 56%, 0.15) 0%, hsla(222, 24%, 7%, 0.9) 100%);
+        backdrop-filter: blur(var(--blur-strength));
+        border: 2px solid var(--secondary);
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(245, 158, 11, 0.25);
+        animation: slide-in 0.5s ease-out;
+    }
+
+    .rules-alert-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: var(--secondary);
+        font-size: 1.8rem;
+        font-family: 'Outfit', sans-serif;
+        margin-bottom: 12px;
+    }
+
+    .rules-alert-header i {
+        filter: drop-shadow(0 0 8px var(--secondary));
+    }
+
+    .rules-list {
+        margin: 20px 0;
+        background: rgba(15, 23, 42, 0.4);
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid var(--border-glass);
+    }
+
+    .rules-list li {
+        list-style: none;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .rules-list li i {
+        color: var(--primary);
+    }
+
+    .btn-accept-rules {
+        background: var(--secondary);
+        color: var(--text-dark);
+        border: none;
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px var(--secondary-glow);
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .btn-accept-rules:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 20px hsla(43, 96%, 56%, 0.4);
+    }
+
+    /* Datos del Grupo */
+    .group-header {
+        background: linear-gradient(135deg, hsla(142, 70%, 15%, 0.2) 0%, var(--bg-card) 100%);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--shadow-premium);
+    }
+
+    .group-header-info h2 {
+        font-size: 2.2rem;
+        color: var(--text-main);
+        margin-bottom: 6px;
+    }
+
+    .group-header-info p {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    .invitation-badge {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--border-glass);
+        padding: 12px 20px;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .invitation-badge span {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        letter-spacing: 0.05em;
+    }
+
+    .invitation-code {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.4rem;
+        color: var(--secondary);
+        letter-spacing: 0.1em;
+    }
+
+    /* Tabla de Posiciones (Ranking) */
+    .ranking-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .ranking-table th {
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        padding: 12px 8px;
+        border-bottom: 1px solid var(--border-glass);
+    }
+
+    .ranking-table td {
+        padding: 14px 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        font-size: 0.95rem;
+    }
+
+    .ranking-row:hover {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .rank-number {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        width: 40px;
+        color: var(--text-muted);
+    }
+
+    .rank-1 .rank-number { color: var(--secondary); font-size: 1.3rem; }
+    .rank-2 .rank-number { color: hsl(0, 0%, 80%); }
+    .rank-3 .rank-number { color: hsl(30, 60%, 50%); }
+
+    .player-name {
+        font-weight: 500;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .role-badge {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 2px 6px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        letter-spacing: 0.02em;
+    }
+
+    .role-badge.admin-tesorero {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--secondary);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .role-badge.admin {
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--secondary);
+        border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .role-badge.tesorero {
+        background: rgba(59, 130, 246, 0.15);
+        color: hsl(217, 91%, 60%);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .role-badge.jugador {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--primary);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .player-balance {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        text-align: right;
+    }
+
+    .player-balance.positive { color: var(--primary); }
+    .player-balance.negative { color: var(--danger); }
+    .player-balance.zero { color: var(--text-muted); }
+
+    /* Partidos y Fixture */
+    .fixture-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .match-item {
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid var(--border-glass);
+        border-radius: 12px;
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 1.5fr 2fr 1.5fr;
+        align-items: center;
+        transition: var(--transition-smooth);
+    }
+
+    .match-item:hover {
+        border-color: var(--border-glass);
+        background: rgba(15, 23, 42, 0.6);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .match-teams {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .match-team {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .match-center {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .match-date {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+
+    .match-status-badge {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-glass);
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .match-status-badge.abierto {
+        background: var(--primary-glow);
+        border-color: var(--primary);
+        color: var(--primary);
+        box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .match-status-badge.cerrado {
+        background: rgba(239, 68, 68, 0.15);
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    .match-status-badge.liquidacion {
+        background: var(--secondary-glow);
+        border-color: var(--secondary);
+        color: var(--secondary);
+    }
+
+    .match-score {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.8rem;
+        color: var(--text-main);
+        letter-spacing: 0.1em;
+        margin-top: 4px;
+    }
+
+    .match-actions {
+        text-align: right;
+    }
+
+    .btn-predict {
+        background: var(--primary);
+        border: none;
+        color: white;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Outfit', sans-serif;
+        box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .btn-predict:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px hsla(142, 69%, 45%, 0.4);
+    }
+
+    .btn-closed {
+        background: var(--border-glass);
+        color: var(--text-muted);
+        border: 1px solid var(--border-glass);
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* Estilos del Muro de Acuerdos */
+    .agreement-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .agreement-item {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        padding-bottom: 8px;
+    }
+
+    .agreement-label {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .agreement-value {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-main);
+    }
+
+    @media (max-width: 992px) {
+        .group-grid {
+            grid-template-columns: 1fr;
+        }
+        .match-item {
+            grid-template-columns: 1fr;
+            gap: 15px;
+            text-align: center;
+        }
+        .match-teams {
+            align-items: center;
+        }
+        .match-actions {
+            text-align: center;
+        }
+        .group-header {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- INDICADOR PRECISO DE VISTA Y FORMULARIO [Willys_IA] -->
+<div class="view-indicator-badge">
+    <i class="fa-solid fa-users"></i> VISTA: Comunidad Cerrada | Detalle del Grupo y Ranking de Balones
+</div>
+
+<!-- CABECERA DEL GRUPO -->
+<div class="group-header">
+    <div class="group-header-info">
+        <h2>{{ grupo.nombre }}</h2>
+        <p><i class="fa-solid fa-align-left" style="margin-right: 6px;"></i> {{ grupo.descripcion or "Sin descripción" }}</p>
+    </div>
+    <div class="invitation-badge" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Código de Invitación</span>
+        <div class="invitation-code" style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--secondary); letter-spacing: 0.1em; cursor: pointer; margin-bottom: 2px;" onclick="copiarEnlaceInvitacion('{{ grupo.codigo_invitacion }}')" title="Haz clic para copiar el enlace de invitación">{{ grupo.codigo_invitacion }}</div>
+        
+        <div style="display: flex; gap: 6px;">
+            <!-- BOTÓN WHATSAPP -->
+            <button type="button" class="btn-action-inline revert" style="background: rgba(37, 211, 102, 0.15); color: #25D366; border: 1px solid #25D366; padding: 4px 10px; font-size: 0.7rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" onclick="compartirWhatsApp('{{ grupo.codigo_invitacion }}', '{{ grupo.nombre }}')" title="Compartir enlace express por WhatsApp">
+                <i class="fa-brands fa-whatsapp"></i> Compartir
+            </button>
+            <!-- BOTÓN COPIAR -->
+            <button type="button" class="btn-action-inline revert" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; padding: 4px 10px; font-size: 0.7rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" onclick="copiarEnlaceInvitacion('{{ grupo.codigo_invitacion }}')" title="Copiar enlace express al portapapeles">
+                <i class="fa-solid fa-link"></i> Copiar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- AVISO DE ACEPTACION DE REGLAS (COMPLIANCE WOW) -->
+{% if not membresia.reglas_aceptadas %}
+    <div class="rules-alert-banner">
+        <div class="rules-alert-header">
+            <i class="fa-solid fa-triangle-exclamation"></i> Acuerdo de Reglas del Grupo
+        </div>
+        <p>Antes de ingresar al juego predictivo y registrar tus predicciones, debes revisar y aceptar explícitamente el reglamento acordado por este grupo de amigos:</p>
+        
+        <div class="rules-list">
+            <ul>
+                <li><i class="fa-solid fa-circle-check"></i> <strong>Aporte estándar:</strong> Se aportarán <strong>{{ grupo.balones_aporte }} Balones</strong> por partido.</li>
+                <li><i class="fa-solid fa-circle-check"></i> <strong>Equivalencia contable:</strong> 1 Balón de juego equivale a <strong>{{ grupo.balon_equivalencia }} {{ grupo.moneda_codigo }}</strong> de valor offline.</li>
+                <li><i class="fa-solid fa-circle-check"></i> <strong>Modalidad de Juego:</strong> Predicciones basadas en el <strong>{{ grupo.tipo_juego }} Exacto</strong>.</li>
+                <li><i class="fa-solid fa-circle-check"></i> <strong>Política de Empates (Pozo Vacío):</strong> Si ningún miembro acierta, los Balones se van a <strong>{{ grupo.politica_pozo_vacio }}</strong>.</li>
+                <li><i class="fa-solid fa-circle-check"></i> <strong>Límite de confirmación de pagos:</strong> Hasta <strong>{{ grupo.limite_pago_minutos }} minutos</strong> antes de que inicie el partido.</li>
+                {% if grupo.acuerdos_especiales %}
+                    <li><i class="fa-solid fa-circle-check"></i> <strong>Acuerdo Particular:</strong> "{{ grupo.acuerdos_especiales }}"</li>
+                {% endif %}
+            </ul>
+        </div>
+        
+        <form action="{{ url_for('main.aceptar_reglas', grupo_id=grupo.id) }}" method="POST">
+            <button type="submit" class="btn-accept-rules">
+                Aceptar Consideraciones y Habilitarme <i class="fa-solid fa-signature"></i>
+            </button>
+        </form>
+    </div>
+{% endif %}
+
+<!-- GRILLA PRINCIPAL: RANKING Y PARTIDOS -->
+<div class="group-grid">
+    
+    <!-- COLUMNA IZQUIERDA: Ranking e Información del Grupo -->
+    <div>
+        <!-- RANKING DE JUGADORES -->
+        <div class="premium-card">
+            <h3><i class="fa-solid fa-ranking-star"></i> Tabla de Posiciones</h3>
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Nombre</th>
+                        <th style="text-align: right;">Balones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in participantes %}
+                        <tr class="ranking-row rank-{{ loop.index }}">
+                            <td class="rank-number">{{ loop.index }}</td>
+                            <td class="player-name">
+                                <span>{{ p.usuario.nombre }}</span>
+                                {% if p.usuario_id == grupo.admin_id and p.usuario_id == grupo.tesorero_id %}
+                                    <span class="role-badge admin-tesorero"><i class="fa-solid fa-crown"></i> Admin / Tesorero</span>
+                                {% elif p.usuario_id == grupo.admin_id %}
+                                    <span class="role-badge admin"><i class="fa-solid fa-crown"></i> Admin</span>
+                                {% elif p.usuario_id == grupo.tesorero_id %}
+                                    <span class="role-badge tesorero"><i class="fa-solid fa-vault"></i> Tesorero</span>
+                                {% else %}
+                                    <span class="role-badge jugador"><i class="fa-solid fa-user"></i> Jugador</span>
+                                {% endif %}
+                                {% if not p.reglas_aceptadas %}
+                                    <span style="font-size: 0.7rem; background: rgba(245, 158, 11, 0.15); color: #f59e0b; padding: 2px 6px; border-radius: 10px; margin-left: 6px;"><i class="fa-solid fa-clock"></i> Por Pagar</span>
+                                {% else %}
+                                    <span style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 6px; border-radius: 10px; margin-left: 6px;"><i class="fa-solid fa-circle-check"></i> Activo</span>
+                                {% endif %}
+                            </td>
+                            <td class="player-balance {% if p.balance_balones > 0 %}positive{% elif p.balance_balones < 0 %}negative{% else %}zero{% endif %}">
+                                {% if p.balance_balones > 0 %}+{% endif %}{{ p.balance_balones }} ⚽
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- MURO DE CONSIDERACIONES (INFORMACION DE REGLAS) -->
+        <div class="premium-card">
+            <h3><i class="fa-solid fa-circle-info"></i> Acuerdo de Reglas</h3>
+            <div class="agreement-list">
+                <div class="agreement-item">
+                    <span class="agreement-label">Aporte Estándar:</span>
+                    <span class="agreement-value">{{ grupo.balones_aporte }} Balones</span>
+                </div>
+                <div class="agreement-item">
+                    <span class="agreement-label">Tasa del Balón:</span>
+                    <span class="agreement-value">1 ⚽ = {{ grupo.balon_equivalencia }} {{ grupo.moneda_codigo }}</span>
+                </div>
+                <div class="agreement-item">
+                    <span class="agreement-label">Modalidad:</span>
+                    <span class="agreement-value">{{ grupo.tipo_juego }}</span>
+                </div>
+                <div class="agreement-item">
+                    <span class="agreement-label">Pozo Vacío:</span>
+                    <span class="agreement-value">{{ grupo.politica_pozo_vacio }}</span>
+                </div>
+                <div class="agreement-item">
+                    <span class="agreement-label">Límite Pago:</span>
+                    <span class="agreement-value">{{ grupo.limite_pago_minutos }} min antes</span>
+                </div>
+                {% if grupo.acuerdos_especiales %}
+                    <div style="border-top: 1px solid var(--border-glass); margin-top: 10px; padding-top: 10px;">
+                        <span class="agreement-label" style="display: block; margin-bottom: 6px;">Acuerdos Especiales:</span>
+                        <p style="font-size: 0.85rem; color: var(--text-main); font-style: italic; background: rgba(255, 255, 255, 0.02); padding: 10px; border-radius: 6px; border-left: 3px solid var(--secondary);">
+                            "{{ grupo.acuerdos_especiales }}"
+                        </p>
+                    </div>
+                {% endif %}
+                <div style="border-top: 1px solid var(--border-glass); margin-top: 10px; padding-top: 10px;">
+                    <span class="agreement-label" style="display: block; margin-bottom: 6px;">Caja del Tesorero (Offline):</span>
+                    <p style="font-size: 0.85rem; color: var(--text-main); background: rgba(15, 23, 42, 0.4); padding: 10px; border-radius: 6px; font-family: monospace;">
+                        {{ grupo.datos_pago_tesorero }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- COLUMNA DERECHA: Calendario de Partidos y Juego Predictivo -->
+    <div>
+        <div class="premium-card">
+            <h3><i class="fa-solid fa-calendar-days"></i> Fixture y Predicciones</h3>
+            
+            <div class="fixture-list">
+                {% if partidos %}
+                    {% for partido in partidos %}
+                        <div class="match-item">
+                            
+                            <!-- Equipos del partido -->
+                            <div class="match-teams">
+                                <div class="match-team">
+                                    <img src="https://flagcdn.com/w40/{{ partido.codigo_local }}.png" alt="Bandera {{ partido.equipo_local }}" style="border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); width: 28px; height: auto;">
+                                    {{ render_jersey(partido.equipo_local, size=24) | safe }}
+                                    <span style="margin-left: 4px;">{{ partido.equipo_local }}</span>
+                                </div>
+                                <div class="match-team">
+                                    <img src="https://flagcdn.com/w40/{{ partido.codigo_visitante }}.png" alt="Bandera {{ partido.equipo_visitante }}" style="border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); width: 28px; height: auto;">
+                                    {{ render_jersey(partido.equipo_visitante, size=24) | safe }}
+                                    <span style="margin-left: 4px;">{{ partido.equipo_visitante }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Centro: Fecha, Estado y Marcador -->
+                            <div class="match-center">
+                                <span class="match-date">{{ partido.fecha_hora.strftime('%d %b - %H:%M') }} UTC</span>
+                                <span class="match-status-badge {{ partido.estado.lower() }}">
+                                    {{ partido.estado }}
+                                </span>
+                                {% if partido.estado in ['Terminado', 'Liquidado'] %}
+                                    <div class="match-score">{{ partido.marcador }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Accion / Boton predictivo -->
+                            <div class="match-actions">
+                                {% if partido.estado == 'Abierto' %}
+                                    {% if membresia.reglas_aceptadas %}
+                                        <a href="/grupo/{{ grupo.id }}/partido/{{ partido.id }}" class="btn-predict">
+                                            Predecir <i class="fa-solid fa-dice-five"></i>
+                                        </a>
+                                    {% else %}
+                                        <button class="btn-closed" title="Debes aceptar el reglamento del grupo" disabled>
+                                            Bloqueado <i class="fa-solid fa-lock"></i>
+                                        </button>
+                                    {% endif %}
+                                {% elif partido.estado == 'Programado' %}
+                                    <span class="btn-closed">Esperando Apertura <i class="fa-solid fa-clock"></i></span>
+                                {% else %}
+                                    <a href="/grupo/{{ grupo.id }}/partido/{{ partido.id }}" class="btn-closed">
+                                        Ver Detalles <i class="fa-solid fa-magnifying-glass"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                            
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+                        <i class="fa-solid fa-soccer-ball" style="font-size: 2.5rem; margin-bottom: 12px; animation: spin 4s linear infinite;"></i>
+                        <p>No hay partidos cargados en el fixture del Mundial aún.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    /**
+     * Envía una invitación pre-formateada directamente a través de WhatsApp. [Willys_IA]
+     */
+    function compartirWhatsApp(codigo, grupoNombre) {
+        const host = window.location.origin;
+        const inviteLink = `${host}/invitacion/${codigo}`;
+        const textShare = `¡Hola! Te invito a unirte a mi grupo cerrado de juego "${grupoNombre}" en ScoreTracker para pronosticar los partidos del Mundial 2026.\n\nCódigo de invitación: *${codigo}*\n\nIngresa directamente y regístrate usando este enlace:\n${inviteLink}`;
+        
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(textShare)}`;
+        window.open(whatsappUrl, '_blank');
+    }
+
+    /**
+     * Copia quirúrgicamente únicamente el link de invitación al portapapeles. [Willys_IA]
+     */
+    function copiarEnlaceInvitacion(codigo) {
+        const host = window.location.origin;
+        const inviteLink = `${host}/invitacion/${codigo}`;
+        
+        navigator.clipboard.writeText(inviteLink).then(() => {
+            alert(`¡Enlace express copiado con éxito!\n\nListo para compartir:\n${inviteLink}`);
+        }).catch(err => {
+            console.error("Error al copiar enlace:", err);
+            // Fallback para navegadores antiguos o entornos locales HTTP restrictivos
+            const tempInput = document.createElement("input");
+            tempInput.value = inviteLink;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            alert(`¡Enlace express copiado con éxito!\n\nListo para compartir:\n${inviteLink}`);
+        });
+    }
+</script>
+{% endblock %}
