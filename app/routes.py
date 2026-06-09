@@ -12,16 +12,6 @@ import logging
 
 bp = Blueprint('main', __name__)
 
-@bp.route('/setup-db-render-secret')
-def setup_db_render_secret():
-    """Ruta secreta para inicializar la base de datos en Render sin Shell. [Willys_IA]"""
-    import reset_db
-    try:
-        reset_db.reset_database()
-        return "Base de datos inicializada y sembrada correctamente.", 200
-    except Exception as e:
-        return f"Error: {str(e)}", 500
-
 def slugificar(texto):
     """Convierte un texto en un slug limpio y amigable para URL y códigos de invitación. [Willys_IA]"""
     # Normalizar y quitar acentos
