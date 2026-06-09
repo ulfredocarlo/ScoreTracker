@@ -948,9 +948,9 @@
                 <i class="fa-solid fa-circle-check"></i> Sesión Activa: {{ current_user.nombre }} ({{ current_user.email }})
             </span>
         {% else %}
-            <a href="{{ url_for('main.login_google_mock') }}" class="btn-hero-google">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" style="width: 20px; height: 20px;">
-                Unirse con Google (1-Clic)
+            <a href="{{ url_for('main.login_google') }}" class="btn-hero-google">
+                <i class="fa-brands fa-google"></i>
+                Conectar con Google
             </a>
             <a href="{{ url_for('main.registro') }}" class="btn-hero-local">
                 Registrar Cuenta Local <i class="fa-solid fa-user-plus"></i>
