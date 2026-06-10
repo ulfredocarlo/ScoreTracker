@@ -36,7 +36,7 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Configuracion especifica para ambiente de produccion (Render). [Willys_IA]"""
     DEBUG = False
-    SESSION_COOKIE_SECURE = False   # Temporalmente False hasta tener certificado SSL
+    SESSION_COOKIE_SECURE = True   # Obliga el uso de HTTPS en produccion (Caddy)
 
 class TestingConfig(Config):
     """Configuracion especifica para pruebas unitarias en memoria. [Willys_IA]"""

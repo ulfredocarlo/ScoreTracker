@@ -5,8 +5,8 @@ services:
     build: .
     container_name: scoretracker-web
     restart: always
-    ports:
-      - "80:5000"
+    expose:
+      - "5000"
     environment:
       - FLASK_ENV=production
       - DATABASE_URL=postgresql://scoretracker_user:SecretaSuperFuerte2026@db:5432/scoretracker_db
@@ -30,5 +30,21 @@ services:
     ports:
       - "5432:5432"
 
+  caddy:
+    image: caddy:2-alpine
+    container_name: scoretracker-caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
 volumes:
   postgres_data:
+  caddy_data:
+  caddy_config:

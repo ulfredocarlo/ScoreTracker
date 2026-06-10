@@ -1,5 +1,6 @@
 import os
-from flask import Flask
+from flask import Flask, flash, redirect, url_for, request
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from authlib.integrations.flask_client import OAuth
@@ -16,6 +17,9 @@ def create_app(config_name='default'):
     # Cargar configuraciones del diccionario
     from config import config_dict
     app.config.from_object(config_dict.get(config_name, config_dict['default']))
+    
+    # Envolver la app con ProxyFix para respetar HTTPS y headers de Caddy
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
     
     # Inicializacion de extensiones con el contexto de la app
     db.init_app(app)

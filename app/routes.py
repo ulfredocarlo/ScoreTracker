@@ -265,7 +265,7 @@ def login():
 def login_google():
     '''Redirige al usuario al flujo de autenticacion de Google OAuth 2.0. [Willys_IA]'''
     from app import oauth
-    redirect_uri = url_for('main.auth_google_callback', _external=True, _scheme='http')
+    redirect_uri = url_for('main.auth_google_callback', _external=True)
     return oauth.google.authorize_redirect(redirect_uri)
 
 @bp.route('/auth/google/callback')

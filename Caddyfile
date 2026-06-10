@@ -1,0 +1,3 @@
+scoretracker.codeia-w.com {
+    reverse_proxy web:5000
+}
