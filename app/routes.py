@@ -3,7 +3,7 @@ import re
 import random
 import string
 import unicodedata
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
@@ -118,13 +118,43 @@ def guardar_imagen_optimizada(file, folder, max_width=800, quality=75):
 
 
 # ==========================================
+# RUTAS AUXILIARES / TAREAS EN SEGUNDO PLANO
+# ==========================================
+
+def evaluar_aperturas_automaticas():
+    """
+    Busca partidos en estado 'Programado' cuya fecha de inicio sea menor o igual 
+    a 5 días desde el momento actual. Si los encuentra, los cambia a 'Abierto'. [Willys_IA]
+    """
+    ahora = datetime.utcnow()
+    limite = ahora + timedelta(days=5)
+    
+    partidos_por_abrir = Partido.query.filter(
+        Partido.estado == 'Programado',
+        Partido.fecha_hora <= limite
+    ).all()
+    
+    if partidos_por_abrir:
+        for p in partidos_por_abrir:
+            p.estado = 'Abierto'
+        try:
+            db.session.commit()
+            print(f"[Willys_IA] {len(partidos_por_abrir)} partidos han sido abiertos automáticamente por estar a 5 días de su inicio.")
+        except Exception as e:
+            db.session.rollback()
+            print(f"[Willys_IA] Error al abrir partidos: {str(e)}")
+
+# ==========================================
 # 1. RUTAS DE AUTENTICACION [Willys_IA]
 # ==========================================
 
 @bp.route('/')
 def index():
     """Ruta raiz: muestra el fixture completo e interactivo para todos los usuarios. [Willys_IA]"""
-    # Obtener todos los partidos ordenados cronológicamente
+    # 1. Ejecutar evaluación perezosa para abrir partidos
+    evaluar_aperturas_automaticas()
+    
+    # 2. Obtener todos los partidos ordenados cronológicamente
     partidos_publicos = Partido.query.order_by(Partido.fecha_hora.asc()).all()
     
     # Obtener predicciones del usuario autenticado para mostrar sus grupos activos
@@ -447,6 +477,10 @@ def invitacion_flujo(codigo):
             flash('Debes aceptar las consideraciones del grupo para unirte.', 'warning')
             return redirect(url_for('main.invitacion_flujo', codigo=codigo))
             
+        if partido and datetime.utcnow() >= partido.fecha_hora:
+            flash('¡El partido ya ha comenzado! No se aceptan pronósticos de último momento.', 'danger')
+            return redirect(url_for('main.index'))
+            
         try:
             # 1. Crear membresía aceptando las reglas automáticamente
             if not membresia_existente:
@@ -552,6 +586,10 @@ def jugar_existente(partido_id):
     } for p in preds}
             
     if request.method == 'POST':
+        if datetime.utcnow() >= partido.fecha_hora:
+            flash('¡El partido ya ha comenzado! Las apuestas están cerradas.', 'danger')
+            return redirect(url_for('main.index'))
+            
         action = request.form.get('action')
         
         if action == 'unirse':
@@ -725,6 +763,10 @@ def jugar_crear(partido_id):
         return redirect(url_for('main.index'))
         
     if request.method == 'POST':
+        if datetime.utcnow() >= partido.fecha_hora:
+            flash('¡El partido ya ha comenzado! Las apuestas están cerradas.', 'danger')
+            return redirect(url_for('main.index'))
+            
         # Creación express
         nombre_visual = request.form.get('nombre_visual', '').strip()
         nombre_grupo = request.form.get('nombre_grupo', '').strip()

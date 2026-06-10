@@ -423,5 +423,75 @@
     </footer>
 
     {% block extra_scripts %}{% endblock %}
+
+    <!-- Motor Global de Cronómetros de Partidos [Willys_IA] -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        function updateCountdowns() {
+            const elements = document.querySelectorAll('.live-countdown');
+            if (elements.length === 0) return;
+            
+            const now = new Date().getTime();
+            
+            elements.forEach(el => {
+                const timeStr = el.getAttribute('data-time');
+                if (!timeStr) return;
+                
+                // UTC time
+                const countDownDate = new Date(timeStr).getTime();
+                const distance = countDownDate - now;
+                
+                if (distance <= 0) {
+                    el.innerHTML = '<span style="color: var(--danger); font-weight: 800; animation: pulse-glow 2s infinite;"><i class="fa-solid fa-circle-play"></i> ¡EN JUEGO!</span>';
+                    
+                    // Bloqueo dinámico de formulario o enlace si se especificó el ID
+                    const targetId = el.getAttribute('data-form-target');
+                    if (targetId) {
+                        const target = document.getElementById(targetId);
+                        if (target && !target.dataset.locked) {
+                            target.dataset.locked = "true";
+                            
+                            if (target.tagName === 'FORM') {
+                                const submitBtn = target.querySelector('button[type="submit"]');
+                                if (submitBtn) {
+                                    submitBtn.disabled = true;
+                                    submitBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Apuestas Cerradas';
+                                    submitBtn.style.background = 'var(--bg-card)';
+                                    submitBtn.style.color = 'var(--text-muted)';
+                                    submitBtn.style.borderColor = 'var(--border-glass)';
+                                }
+                                const inputs = target.querySelectorAll('input, select, textarea');
+                                inputs.forEach(input => input.disabled = true);
+                            } else {
+                                // Es un enlace <a> o botón suelto
+                                target.style.pointerEvents = 'none';
+                                target.style.opacity = '0.5';
+                                target.innerHTML = '<i class="fa-solid fa-lock"></i> Cerrado';
+                                target.style.background = 'var(--bg-card)';
+                                target.style.borderColor = 'var(--border-glass)';
+                            }
+                        }
+                    }
+                } else {
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                    
+                    let timeText = '';
+                    if (days > 0) timeText += days + "d ";
+                    if (hours > 0 || days > 0) timeText += hours + "h ";
+                    timeText += minutes + "m " + seconds + "s";
+                    
+                    el.innerHTML = '<i class="fa-solid fa-stopwatch" style="color: var(--secondary);"></i> ' + timeText;
+                }
+            });
+        }
+        
+        // Ejecutar inmediatamente y luego cada segundo
+        updateCountdowns();
+        setInterval(updateCountdowns, 1000);
+    });
+    </script>
 </body>
 </html>
