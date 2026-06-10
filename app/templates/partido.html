@@ -445,8 +445,10 @@
             </div>
         </div>
         <span class="widget-date">
-            <i class="fa-solid fa-calendar-day" style="margin-right: 6px;"></i> 
-            {{ partido.fecha_hora.strftime('%d de %B - %H:%M') }} UTC 
+            <span class="local-time" data-time="{{ partido.fecha_hora.isoformat() }}Z" data-format="long">
+                <i class="fa-solid fa-calendar-day" style="margin-right: 6px;"></i> 
+                {{ partido.fecha_hora.strftime('%d de %B - %H:%M') }} UTC
+            </span> 
             | <span class="live-countdown" data-time="{{ partido.fecha_hora.isoformat() }}Z" data-form-target="btn-jugar" style="font-weight: 700;">Cargando...</span>
             {% if partido.lugar %}
             | <i class="fa-solid fa-location-dot" style="margin-left: 4px; margin-right: 4px; color: var(--primary);"></i> Sede: <strong>{{ partido.lugar }}</strong>

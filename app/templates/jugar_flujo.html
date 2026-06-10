@@ -333,7 +333,7 @@
     
     <div class="match-banner-info">
         <span><i class="fa-solid fa-calendar-day" style="color: var(--primary);"></i> {{ format_fecha_es(partido.fecha_hora) }}</span>
-        <span><i class="fa-solid fa-clock" style="color: var(--secondary);"></i> {{ partido.fecha_hora.strftime('%H:%M') }} UTC</span>
+        <span class="local-time" data-time="{{ partido.fecha_hora.isoformat() }}Z" data-format="short" style="display: flex; align-items: center; gap: 4px;"><i class="fa-solid fa-clock" style="color: var(--secondary);"></i> {{ partido.fecha_hora.strftime('%H:%M') }} UTC</span>
         <span><i class="fa-solid fa-location-dot" style="color: var(--accent);"></i> {{ partido.lugar }}</span>
     </div>
 </div>

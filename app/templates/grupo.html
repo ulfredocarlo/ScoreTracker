@@ -622,7 +622,7 @@
                             
                             <!-- Centro: Fecha, Estado y Marcador -->
                             <div class="match-center">
-                                <span class="match-date">{{ partido.fecha_hora.strftime('%d %b - %H:%M') }} UTC</span>
+                                <span class="match-date local-time" data-time="{{ partido.fecha_hora.isoformat() }}Z" data-format="medium">{{ partido.fecha_hora.strftime('%d %b - %H:%M') }} UTC</span>
                                 <span class="match-status-badge {{ partido.estado.lower() }}">
                                     {{ partido.estado }}
                                 </span>

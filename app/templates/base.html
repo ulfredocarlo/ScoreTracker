@@ -427,6 +427,23 @@
     <!-- Motor Global de Cronómetros de Partidos [Willys_IA] -->
     <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // Traductor Local de Horarios [Willys_IA]
+        const localTimeElements = document.querySelectorAll('.local-time');
+        localTimeElements.forEach(el => {
+            const timeStr = el.getAttribute('data-time');
+            const format = el.getAttribute('data-format') || 'short';
+            if (timeStr) {
+                const date = new Date(timeStr);
+                if (format === 'short') {
+                    el.innerHTML = '<i class="fa-solid fa-clock" style="margin-right: 4px;"></i> ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' <span style="font-size: 0.7em; opacity: 0.6; font-weight: 400;">(Local)</span>';
+                } else if (format === 'medium') {
+                    el.innerHTML = date.toLocaleDateString([], {day: '2-digit', month: 'short'}) + ' - ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' <span style="font-size: 0.7em; opacity: 0.6; font-weight: 400;">(Local)</span>';
+                } else if (format === 'long') {
+                    el.innerHTML = '<i class="fa-solid fa-calendar-day" style="margin-right: 6px;"></i> ' + date.toLocaleDateString([], {day: '2-digit', month: 'long'}) + ' - ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' <span style="font-size: 0.7em; opacity: 0.6; font-weight: 400;">(Local)</span>';
+                }
+            }
+        });
+
         function updateCountdowns() {
             const elements = document.querySelectorAll('.live-countdown');
             if (elements.length === 0) return;

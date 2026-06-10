@@ -1026,7 +1026,7 @@
                         {{ cod_juego }}
                     </td>
                     <td class="cell-time text-center" data-label="Hora" style="line-height: 1.4;">
-                        <div><i class="fa-solid fa-clock" style="margin-right: 4px;"></i> {{ partido.fecha_hora.strftime('%H:%M') }} UTC</div>
+                        <div class="local-time" data-time="{{ partido.fecha_hora.isoformat() }}Z" data-format="short"><i class="fa-solid fa-clock" style="margin-right: 4px;"></i> {{ partido.fecha_hora.strftime('%H:%M') }} UTC</div>
                         <div class="live-countdown" data-time="{{ partido.fecha_hora.isoformat() }}Z" style="font-size: 0.75rem; margin-top: 4px; font-weight: 600;"></div>
                     </td>
                     <td class="text-center" data-label="Grupo / Fase">
