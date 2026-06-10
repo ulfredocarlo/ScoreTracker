@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: scoretracker-web
+    restart: always
+    ports:
+      - "80:5000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://scoretracker_user:SecretaSuperFuerte2026@db:5432/scoretracker_db
+      - SECRET_KEY=TuClaveSecretaDeFlaskMuySegura
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+      - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
+      - OAUTHLIB_INSECURE_TRANSPORT=1
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: scoretracker-db
+    restart: always
+    environment:
+      - POSTGRES_USER=scoretracker_user
+      - POSTGRES_PASSWORD=SecretaSuperFuerte2026
+      - POSTGRES_DB=scoretracker_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
