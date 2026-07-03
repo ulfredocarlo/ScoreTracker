@@ -122,26 +122,18 @@ def guardar_imagen_optimizada(file, folder, max_width=800, quality=75):
 # ==========================================
 
 def evaluar_aperturas_automaticas():
-    """Gestiona los estados del partido: Abrir (4 días), En Curso (inicio), Terminado (3 hrs después). [Willys_IA]"""
     ahora = datetime.utcnow()
-    limite_abrir = ahora + timedelta(days=4)
-    limite_terminar = ahora - timedelta(hours=3)
+    limite = ahora + timedelta(days=7) # 7 dias
     
     partidos_por_abrir = Partido.query.filter(
         Partido.estado == 'Programado',
-        Partido.fecha_hora <= limite_abrir,
+        Partido.fecha_hora <= limite,
         Partido.fecha_hora > ahora
     ).all()
     
     partidos_en_juego = Partido.query.filter(
-        Partido.estado.in_(['Programado', 'Abierto']),
-        Partido.fecha_hora <= ahora,
-        Partido.fecha_hora > limite_terminar
-    ).all()
-    
-    partidos_viejos = Partido.query.filter(
-        Partido.estado.notin_(['Terminado', 'Liquidado']),
-        Partido.fecha_hora <= limite_terminar
+        Partido.estado == 'Abierto',
+        Partido.fecha_hora <= ahora
     ).all()
     
     modificados = False
@@ -153,16 +145,11 @@ def evaluar_aperturas_automaticas():
         p.estado = 'En Curso'
         modificados = True
         
-    for p in partidos_viejos:
-        p.estado = 'Terminado'
-        modificados = True
-        
     if modificados:
         try:
             db.session.commit()
-        except Exception as e:
+        except:
             db.session.rollback()
-            print(f"[Willys_IA] Error al actualizar estados automáticos: {str(e)}")
 
 # ==========================================
 # 1. RUTAS DE AUTENTICACION [Willys_IA]
@@ -174,28 +161,11 @@ def index():
     # 1. Ejecutar evaluación perezosa para abrir partidos
     evaluar_aperturas_automaticas()
     
-    # 2. Obtener partidos activos filtrando por ventana de tiempo (ayer hasta +4 días) [Willys_IA]
+    # 2. Obtener partidos activos ordenados cronológicamente (excluye Terminado y Liquidado) [Willys_IA]
     from sqlalchemy import case
-    from datetime import datetime, timedelta
-
-    ahora = datetime.utcnow()
-    hora_bolivia = ahora - timedelta(hours=4)
-    
-    # Límite: Desde ayer (00:00) hasta 4 días después (23:59)
-    ayer = hora_bolivia - timedelta(days=1)
-    limite_inicio_bo = datetime(ayer.year, ayer.month, ayer.day, 0, 0, 0)
-    fin_dias_bo = limite_inicio_bo + timedelta(days=5, hours=23, minutes=59, seconds=59)
-
-    limite_inicio_utc = limite_inicio_bo + timedelta(hours=4)
-    limite_fin_utc = fin_dias_bo + timedelta(hours=4)
-
-    # Los terminados van al final (a la cola)
-    partidos_publicos = Partido.query.filter(
-        Partido.fecha_hora >= limite_inicio_utc,
-        Partido.fecha_hora <= limite_fin_utc
-    ).order_by(
+    partidos_publicos = Partido.query.order_by(
         case(
-            (Partido.estado.in_(['Terminado', 'Liquidado']), 1),
+            [(Partido.estado.in_(['Terminado', 'Liquidado']), 1)],
             else_=0
         ),
         Partido.fecha_hora.asc()
@@ -1180,25 +1150,10 @@ def ver_partido(grupo_id, partido_id):
         grupo_id=grupo.id
     ).all()
     partido_liquidado = len(liquidaciones) > 0
-    resumen_liquidacion = None
-    if partido_liquidado:
-        # Extraer detalle de ganadores
-        ganadores_detalle = [
-            {'nombre': l.usuario.nombre, 'premio': l.ganancia_neta + l.monto_aportado}
-            for l in liquidaciones if l.gano
-        ]
-        
-        # Extraer la comisión cobrada a este grupo por este partido
-        from app.models import ComisionHistorial
-        comision_obj = ComisionHistorial.query.filter_by(grupo_id=grupo.id, partido_id=partido.id).first()
-        comision = float(comision_obj.monto_balones) if comision_obj else 0
-        
-        resumen_liquidacion = {
-            'ganadores': len(ganadores_detalle),
-            'premio_total': sum(g['premio'] for g in ganadores_detalle) if ganadores_detalle else 0,
-            'ganadores_detalle': ganadores_detalle,
-            'comision_admin': comision
-        }
+    resumen_liquidacion = {
+        'ganadores': len([l for l in liquidaciones if l.gano]),
+        'premio_total': sum([l.ganancia_neta + l.monto_aportado for l in liquidaciones if l.gano]) if liquidaciones else 0
+    } if partido_liquidado else None
 
     return render_template(
         'partido.html',

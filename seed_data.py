@@ -56,6 +56,17 @@ def cargar_partidos_semilla():
             estado="Abierto"
         )
         
+        # Corea del Sur vs República Checa (11 de Junio 2026)
+        partido3_b = Partido(
+            equipo_local="Corea del Sur",
+            equipo_visitante="Republica Checa",
+            codigo_local="kr",
+            codigo_visitante="cz",
+            fecha_hora=datetime(2026, 6, 11, 21, 0), # 21:00 UTC
+            fase="Grupo A - Fecha 1",
+            estado="Programado"
+        )
+        
         # Canadá vs Bosnia y Herzegovina (12 de Junio 2026 - Toronto Stadium)
         partido4 = Partido(
             equipo_local="Canada",
@@ -89,7 +100,7 @@ def cargar_partidos_semilla():
             estado="Programado"
         )
         
-        db.session.add_all([partido1, partido2, partido3, partido4, partido5, partido6])
+        db.session.add_all([partido1, partido2, partido3, partido3_b, partido4, partido5, partido6])
         
         try:
             db.session.commit()

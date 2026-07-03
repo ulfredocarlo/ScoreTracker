@@ -994,7 +994,7 @@
         {% if partidos %}
             {% set vars = namespace(last_date='') %}
             {% for partido in partidos %}
-                {% set current_date = partido.fecha_hora.strftime('%Y-%m-%d') %}
+                {% set current_date = to_local_bo(partido.fecha_hora).strftime('%Y-%m-%d') %}
                 {% if current_date != vars.last_date %}
                     {% set vars.last_date = current_date %}
                     <!-- Cabecera de Fecha Cronológica [Willys_IA] -->
@@ -1096,6 +1096,7 @@
                                     </div>
                                     
                                     <!-- Enlaces pequeños para crear/unirse a otro grupo para este partido -->
+                                    {% if partido.estado == 'Abierto' %}
                                     <div style="display: flex; gap: 10px; font-size: 0.75rem; margin-top: 2px;">
                                         <a href="{{ url_for('main.jugar_crear', partido_id=partido.id) }}" style="color: var(--primary); text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;" title="Crear otro grupo para este partido">
                                             <i class="fa-solid fa-plus"></i> Crear otro
@@ -1104,6 +1105,7 @@
                                             <i class="fa-solid fa-key"></i> Unirse a otro
                                         </a>
                                     </div>
+                                    {% endif %}
                                 {% else %}
                                     <!-- 2. Si no participa aún y el partido está abierto, mostramos los dos botones de acción directa -->
                                     {% if partido.estado == 'Abierto' %}

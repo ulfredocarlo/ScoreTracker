@@ -204,8 +204,14 @@ def create_app(config_name='default'):
             """
             return svg_str
             
+        def to_local_bo(dt):
+            """Convierte hora UTC a hora local Bolivia (-4) para agrupamiento visual correcto. [Willys_IA]"""
+            from datetime import timedelta
+            return dt - timedelta(hours=4)
+            
         def format_fecha_es(dt):
             """Formatea un datetime en espanol de forma independiente a la configuracion regional. [Willys_IA]"""
+            dt_bo = to_local_bo(dt)
             dias = {
                 'Monday': 'Lunes', 'Tuesday': 'Martes', 'Wednesday': 'Miércoles',
                 'Thursday': 'Jueves', 'Friday': 'Viernes', 'Saturday': 'Sábado', 'Sunday': 'Domingo'
@@ -214,11 +220,11 @@ def create_app(config_name='default'):
                 1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
                 7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
             }
-            dia_sem = dias.get(dt.strftime('%A'), dt.strftime('%A'))
-            dia_num = dt.day
-            mes_nom = meses.get(dt.month, '')
+            dia_sem = dias.get(dt_bo.strftime('%A'), dt_bo.strftime('%A'))
+            dia_num = dt_bo.day
+            mes_nom = meses.get(dt_bo.month, '')
             return f"{dia_sem}, {dia_num} de {mes_nom}"
             
-        return dict(render_jersey=render_jersey, format_fecha_es=format_fecha_es)
+        return dict(render_jersey=render_jersey, format_fecha_es=format_fecha_es, to_local_bo=to_local_bo)
 
     return app

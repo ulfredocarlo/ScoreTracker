@@ -562,7 +562,54 @@
             </div>
         </div>
 
+        {% if partido_liquidado and resumen_liquidacion %}
+        <!-- RESULTADOS DE LIQUIDACIÓN PÚBLICOS [Willys_IA] -->
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 25px; border-radius: 16px; border: 1px solid var(--border-glass); margin-bottom: 25px; box-shadow: var(--shadow-premium);">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span style="color: var(--primary); font-weight: 900; font-size: 1.3rem; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em;">
+                    <i class="fa-solid fa-trophy"></i> Resultados Oficiales
+                </span>
+                <span style="color: var(--text-muted); font-size: 0.95rem;">El partido ha sido liquidado y los premios distribuidos.</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                    <span style="display: block; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px;">Total Repartido</span>
+                    <span style="display: block; color: var(--secondary); font-size: 1.5rem; font-weight: 900;">{{ resumen_liquidacion.premio_total }} ⚽</span>
+                </div>
+                {% if resumen_liquidacion.comision_admin > 0 %}
+                <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                    <span style="display: block; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px;">Comisión Admin</span>
+                    <span style="display: block; color: var(--text-main); font-size: 1.5rem; font-weight: 900;">{{ resumen_liquidacion.comision_admin }} ⚽</span>
+                </div>
+                {% endif %}
+                <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                    <span style="display: block; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px;">Ganadores Totales</span>
+                    <span style="display: block; color: white; font-size: 1.5rem; font-weight: 900;">{{ resumen_liquidacion.ganadores }}</span>
+                </div>
+            </div>
 
+            {% if resumen_liquidacion.ganadores > 0 %}
+            <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 15px; border: 1px solid rgba(255,255,255,0.05);">
+                <h5 style="color: white; font-size: 0.95rem; margin-bottom: 15px; text-align: center; font-weight: 700;">Desglose de Ganadores</h5>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    {% for g in resumen_liquidacion.ganadores_detalle %}
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                        <span style="color: var(--text-main); font-weight: 700;">
+                            <i class="fa-solid fa-user-circle" style="color: var(--text-muted); margin-right: 8px;"></i>{{ g.nombre }}
+                        </span>
+                        <span style="color: var(--secondary); font-weight: 900;">+{{ g.premio }} ⚽</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 12px;">
+                <span style="color: var(--text-muted); font-style: italic;">No hubo ganadores en este partido. El pozo queda a discreción del administrador (o se acumula).</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
 
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
             Muestra el listado de miembros del grupo, sus pronósticos, comprobantes de pago offline y conciliaciones del Tesorero.
@@ -573,9 +620,9 @@
                 <thead>
                     <tr>
                         <th>Miembro</th>
+                        <th>Estado Pago</th>
                         <th>Pronóstico</th>
                         <th>Aporte Offline</th>
-                        <th>Estado Pago</th>
                         {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] %}
                             <th style="text-align: right;">Acciones Tesorero</th>
                         {% endif %}
@@ -639,6 +686,27 @@
                                 </div>
                             </td>
 
+                            <!-- 4. Estado de Pago / Conciliación -->
+                            <td>
+                                {% if pred %}
+                                    {% if es_el_usuario_logueado and caja_estado == 'Por Pagar' %}
+                                        <!-- Botón para subir comprobante (Abre Modal) -->
+                                        <button class="status-caja por-pagar" style="cursor: pointer; transition: all 0.2s;" onclick="abrirModalSubidaPago()" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i> Pagar
+                                        </button>
+                                    {% else %}
+                                        <span class="status-caja {{ caja_estado | replace(' ', '-') | lower }}" id="badge-caja-{{ p.usuario_id }}">
+                                            <i class="fa-solid {% if caja_estado == 'Participa' %}fa-circle-check{% elif caja_estado == 'Por Validar' %}fa-magnifying-glass{% else %}fa-clock{% endif %}"></i>
+                                            {{ caja_estado }}
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="status-caja por-pagar" style="background: rgba(255,255,255,0.02); color: var(--text-muted); border-color: var(--border-glass);">
+                                        --
+                                    </span>
+                                {% endif %}
+                            </td>
+
                             <!-- 2. Pronóstico del Marcador -->
                             <td>
                                 {% if pred %}
@@ -691,26 +759,7 @@
                                 {% endif %}
                             </td>
 
-                            <!-- 4. Estado de Pago / Conciliación -->
-                            <td>
-                                {% if pred %}
-                                    {% if es_el_usuario_logueado and caja_estado == 'Por Pagar' %}
-                                        <!-- Botón para subir comprobante (Abre Modal) -->
-                                        <button class="status-caja por-pagar" style="cursor: pointer; transition: all 0.2s;" onclick="abrirModalSubidaPago()" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                                            <i class="fa-solid fa-cloud-arrow-up"></i> Pagar
-                                        </button>
-                                    {% else %}
-                                        <span class="status-caja {{ caja_estado | replace(' ', '-') | lower }}" id="badge-caja-{{ p.usuario_id }}">
-                                            <i class="fa-solid {% if caja_estado == 'Participa' %}fa-circle-check{% elif caja_estado == 'Por Validar' %}fa-magnifying-glass{% else %}fa-clock{% endif %}"></i>
-                                            {{ caja_estado }}
-                                        </span>
-                                    {% endif %}
-                                {% else %}
-                                    <span class="status-caja por-pagar" style="background: rgba(255,255,255,0.02); color: var(--text-muted); border-color: var(--border-glass);">
-                                        --
-                                    </span>
-                                {% endif %}
-                            </td>
+                            <!-- Columna 4 movida a la segunda posicion -->
 
                             {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] %}
                                 <td style="text-align: right;">
@@ -810,7 +859,7 @@
     </div>
 
     <!-- MODAL DE CIERRE DE PARTIDO / LIQUIDACION [Willys_IA] -->
-    {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] %}
+    {% if current_user.id in [grupo.admin_id, grupo.tesorero_id] and not partido_liquidado %}
     <div id="liquidacion-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 9999; justify-content: center; align-items: center; animation: fade-in 0.3s ease-out;">
         <div style="background: rgba(30, 41, 59, 0.75); border: 1px solid var(--border-glass); border-radius: 24px; padding: 30px; max-width: 450px; width: 90%; box-shadow: var(--shadow-premium); text-align: center; position: relative;">
             <button type="button" onclick="cerrarModalLiquidacion()" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; transition: var(--transition-smooth);" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-muted)'">
@@ -822,27 +871,41 @@
             </h4>
             <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 25px;">Registra el resultado final oficial para calcular ganadores y distribuir el pozo.</p>
             
-            {% if partido_liquidado %}
-                <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; border: 1px solid var(--border-glass); text-align: center;">
-                    <span style="color: var(--primary); font-weight: 800; font-size: 1.1rem; display: block; margin-bottom: 10px;"><i class="fa-solid fa-check-circle"></i> PARTIDO LIQUIDADO</span>
-                    <span style="color: var(--text-main); font-size: 0.95rem; display: block; margin-bottom: 5px;">Ganadores: <strong>{{ resumen_liquidacion.ganadores }}</strong></span>
-                    <span style="color: var(--secondary); font-size: 1.1rem; font-weight: 800; display: block;">Premio Repartido: {{ resumen_liquidacion.premio_total }} ⚽</span>
+            <div style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
+                <div style="text-align: left;">
+                    <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: block;">Apuestas Registradas</span>
+                    <span style="color: white; font-weight: 800; font-size: 1.1rem;">{{ todas_predicciones|length }}</span>
                 </div>
-            {% else %}
-                <form id="form-liquidar" onsubmit="ejecutarLiquidacion(event)">
-                    <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1);">
-                        <label style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 15px;">Ingresar Marcador Final:</label>
-                        <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
-                            <input type="number" id="liq_local" min="0" max="99" required placeholder="L" style="width: 70px; height: 50px; font-size: 1.5rem; background: rgba(255,255,255,0.1); border: 1px solid var(--border-glass); color: white; border-radius: 8px; text-align: center; font-family: 'Outfit', sans-serif;">
-                            <span style="font-weight: 900; font-size: 2rem; color: var(--text-muted);">-</span>
-                            <input type="number" id="liq_visit" min="0" max="99" required placeholder="V" style="width: 70px; height: 50px; font-size: 1.5rem; background: rgba(255,255,255,0.1); border: 1px solid var(--border-glass); color: white; border-radius: 8px; text-align: center; font-family: 'Outfit', sans-serif;">
+                <div style="text-align: right;">
+                    <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: block;">Pozo a Repartir</span>
+                    <span style="color: var(--secondary); font-weight: 800; font-size: 1.1rem;">{{ todas_predicciones|length * grupo.balones_aporte }} ⚽</span>
+                </div>
+            </div>
+
+            <form id="form-liquidar" onsubmit="ejecutarLiquidacion(event)">
+                <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 25px 20px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div style="text-align: center; flex: 1;">
+                            <span class="flag-icon flag-icon-{{ partido.codigo_local }}" style="font-size: 2rem; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-bottom: 8px;"></span>
+                            <span style="display: block; font-size: 0.85rem; font-weight: 700; color: white;">{{ partido.equipo_local }}</span>
+                        </div>
+                        <div style="font-weight: 900; font-size: 1.2rem; color: var(--text-muted); padding: 0 10px;">VS</div>
+                        <div style="text-align: center; flex: 1;">
+                            <span class="flag-icon flag-icon-{{ partido.codigo_visitante }}" style="font-size: 2rem; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-bottom: 8px;"></span>
+                            <span style="display: block; font-size: 0.85rem; font-weight: 700; color: white;">{{ partido.equipo_visitante }}</span>
                         </div>
                     </div>
-                    <button type="submit" class="btn-action-inline approve" style="width: 100%; padding: 14px; font-size: 1.05rem; justify-content: center; font-weight: 800; background: linear-gradient(135deg, var(--primary) 0%, hsl(142, 75%, 35%) 100%); color: white; border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); border-radius: 10px;">
-                        <i class="fa-solid fa-gavel"></i> Confirmar y Liquidar Pozo
-                    </button>
-                </form>
-            {% endif %}
+                    
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+                        <input type="number" id="liq_local" min="0" max="99" required placeholder="0" style="width: 80px; height: 60px; font-size: 2rem; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.2); color: white; border-radius: 12px; text-align: center; font-family: 'Outfit', sans-serif; transition: all 0.3s ease;" onfocus="this.style.borderColor='var(--primary)'; this.style.background='rgba(255,255,255,0.1)'" onblur="this.style.borderColor='rgba(255,255,255,0.2)'; this.style.background='rgba(255,255,255,0.05)'">
+                        <span style="font-weight: 900; font-size: 2rem; color: var(--text-muted);">-</span>
+                        <input type="number" id="liq_visit" min="0" max="99" required placeholder="0" style="width: 80px; height: 60px; font-size: 2rem; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.2); color: white; border-radius: 12px; text-align: center; font-family: 'Outfit', sans-serif; transition: all 0.3s ease;" onfocus="this.style.borderColor='var(--primary)'; this.style.background='rgba(255,255,255,0.1)'" onblur="this.style.borderColor='rgba(255,255,255,0.2)'; this.style.background='rgba(255,255,255,0.05)'">
+                    </div>
+                </div>
+                <button type="submit" class="btn-action-inline approve" style="width: 100%; padding: 16px; font-size: 1.1rem; justify-content: center; font-weight: 900; background: linear-gradient(135deg, var(--primary) 0%, hsl(142, 75%, 35%) 100%); color: white; border: none; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); border-radius: 12px; text-transform: uppercase; letter-spacing: 0.05em; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16, 185, 129, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.4)'">
+                    <i class="fa-solid fa-gavel"></i> Confirmar y Liquidar
+                </button>
+            </form>
         </div>
     </div>
     {% endif %}
@@ -1152,6 +1215,37 @@
     function cerrarModalLiquidacion() {
         const modal = document.getElementById('liquidacion-modal');
         if (modal) modal.style.display = 'none';
+    }
+
+    /**
+     * Ejecuta la liquidación enviando el marcador al backend. [Willys_IA]
+     */
+    function ejecutarLiquidacion(event) {
+        event.preventDefault();
+        
+        const local = document.getElementById('liq_local').value;
+        const visit = document.getElementById('liq_visit').value;
+        
+        if (local === '' || visit === '') {
+            alert('Por favor, ingresa el marcador completo.');
+            return;
+        }
+        
+        const marcador = `${local}-${visit}`;
+        
+        // Crear un formulario virtual para enviar el POST
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ url_for('main.liquidar_partido_endpoint', grupo_id=grupo.id, partido_id=partido.id) }}";
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'marcador';
+        input.value = marcador;
+        
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
     }
 
     /**
